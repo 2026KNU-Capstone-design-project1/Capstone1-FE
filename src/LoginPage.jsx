@@ -49,8 +49,13 @@ export default function LoginPage({ onLogin, signupHref = '/signup', forgotPassw
         if (rememberId) localStorage.setItem(SAVED_ID_KEY, normalizedId);
         else localStorage.removeItem(SAVED_ID_KEY);
       } catch {}
-    } catch {
-      setMessage('로그인에 실패했습니다. 입력 정보와 네트워크 연결을 확인해 주세요.');
+      setMessage('로그인되었습니다.');
+    } catch (error) {
+      setMessage(
+        error?.status === 401
+          ? '아이디 또는 비밀번호가 올바르지 않습니다.'
+          : '로그인에 실패했습니다. 네트워크 연결을 확인해 주세요.',
+      );
     } finally { setIsSubmitting(false); }
   }
 

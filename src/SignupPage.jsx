@@ -44,7 +44,6 @@ const labelClass =
 
 export default function SignupPage({
   onSignup,
-  onCheckLoginId,
   sites = [],
   loginHref = '/login',
 }) {
@@ -62,8 +61,6 @@ export default function SignupPage({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [idChecked, setIdChecked] = useState(false);
-  const [isCheckingId, setIsCheckingId] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [idMessage, setIdMessage] = useState('');
@@ -79,7 +76,6 @@ export default function SignupPage({
     setMessage('');
 
     if (field === 'loginId') {
-      setIdChecked(false);
       setIdMessage('');
     }
   }
@@ -93,37 +89,13 @@ export default function SignupPage({
     setMessage('');
   }
 
-  async function handleCheckId() {
-    const loginId = form.loginId.trim();
-
-    if (!loginId) {
+  function handleCheckId() {
+    if (!form.loginId.trim()) {
       setIdMessage('아이디를 입력해 주세요.');
       return;
     }
 
-    if (!onCheckLoginId) {
-      setIdMessage('중복 확인 API 연결');
-      return;
-    }
-
-    setIsCheckingId(true);
-    setIdChecked(false);
-    setIdMessage('');
-
-    try {
-      const available = await onCheckLoginId(loginId);
-
-      if (available === true) {
-        setIdChecked(true);
-        setIdMessage('사용 가능한 아이디입니다.');
-      } else {
-        setIdMessage('이미 사용 중인 아이디입니다.');
-      }
-    } catch {
-      setIdMessage('중복 확인에 실패했습니다.');
-    } finally {
-      setIsCheckingId(false);
-    }
+    setIdMessage('아이디 중복 확인 기능은 추후 연결 예정입니다.');
   }
 
   function formatPhone(value) {
@@ -142,16 +114,6 @@ export default function SignupPage({
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage('');
-
-    if (isCheckingId) {
-      setMessage('아이디 중복 확인 중입니다.');
-      return;
-    }
-
-    if (!idChecked) {
-      setMessage('아이디 중복 확인을 완료해 주세요.');
-      return;
-    }
 
     if (form.password !== form.confirmPassword) {
       setMessage('비밀번호가 일치하지 않습니다.');
@@ -180,8 +142,13 @@ export default function SignupPage({
         role: form.role,
         siteId: isSiteManager ? form.siteId : null,
       });
-    } catch {
-      setMessage('회원가입에 실패했습니다. 입력 정보를 확인해 주세요.');
+      setMessage('회원가입이 완료되었습니다. 로그인해 주세요.');
+    } catch (error) {
+      setMessage(
+        error?.status === 409
+          ? '이미 사용 중인 아이디입니다.'
+          : '회원가입에 실패했습니다. 입력 정보를 확인해 주세요.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -268,24 +235,22 @@ export default function SignupPage({
                   value={form.loginId}
                   onChange={e => updateField('loginId', e.target.value)}
                   required
-                  disabled={isSubmitting || isCheckingId}
+                  disabled={isSubmitting}
                 />
 
                 <button
                   type="button"
                   onClick={handleCheckId}
-                  disabled={isCheckingId || isSubmitting}
+                  disabled={isSubmitting}
                   className="h-[43px] shrink-0 cursor-pointer rounded-md border border-[#456176] bg-[#172D3C] px-4 text-[14px] font-semibold text-[#E7EDF5] transition-colors hover:bg-[#234052] disabled:cursor-wait disabled:opacity-60"
                 >
-                  {isCheckingId ? '확인 중' : '중복 확인'}
+                  중복 확인
                 </button>
               </div>
 
               {idMessage && (
                 <p
-                  className={`mt-1 text-[12px] ${
-                    idChecked ? 'text-[#35C77A]' : 'text-[#FF8A8A]'
-                  }`}
+                  className="mt-1 text-[12px] text-[#AFBDCB]"
                   role="status"
                 >
                   {idMessage}
@@ -507,7 +472,7 @@ export default function SignupPage({
       
             <button
               type="submit"
-              disabled={isSubmitting || isCheckingId}
+              disabled={isSubmitting}
               className="mt-1 h-[43px] w-full cursor-pointer rounded-md bg-[#E87817] text-[15px] font-bold text-[#081720] transition-colors hover:bg-[#FF952E] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FF8418] disabled:cursor-wait disabled:opacity-60"
             >
               {isSubmitting ? '가입 처리 중…' : '회원가입'}

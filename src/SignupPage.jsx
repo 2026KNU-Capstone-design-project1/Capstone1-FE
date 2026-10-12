@@ -43,6 +43,7 @@ const labelClass =
   'mb-1.5 block text-[14px] font-semibold text-[#E7EDF5]';
 
 export default function SignupPage({
+  onCheckLoginId,
   onSignup,
   sites = [],
   loginHref = '/login',
@@ -62,8 +63,11 @@ export default function SignupPage({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingId, setIsCheckingId] = useState(false);
   const [message, setMessage] = useState('');
   const [idMessage, setIdMessage] = useState('');
+  const [checkedLoginId, setCheckedLoginId] = useState('');
+  const [isLoginIdAvailable, setIsLoginIdAvailable] = useState(false);
 
   const isSiteManager = form.role === 'SITE_MANAGER';
 
@@ -77,6 +81,8 @@ export default function SignupPage({
 
     if (field === 'loginId') {
       setIdMessage('');
+      setCheckedLoginId('');
+      setIsLoginIdAvailable(false);
     }
   }
 
@@ -89,13 +95,50 @@ export default function SignupPage({
     setMessage('');
   }
 
-  function handleCheckId() {
-    if (!form.loginId.trim()) {
+  async function handleCheckId() {
+    const loginId = form.loginId.trim();
+
+    if (!loginId) {
       setIdMessage('아이디를 입력해 주세요.');
       return;
     }
 
-    setIdMessage('아이디 중복 확인 기능은 추후 연결 예정입니다.');
+    if (loginId.length > 255) {
+      setIdMessage('아이디는 255자 이하로 입력해 주세요.');
+      return;
+    }
+
+    if (!onCheckLoginId) {
+      setIdMessage('아이디 중복 확인 API가 연결되지 않았습니다.');
+      return;
+    }
+
+    setIsCheckingId(true);
+    setIdMessage('');
+    setCheckedLoginId('');
+    setIsLoginIdAvailable(false);
+
+    try {
+      const result = await onCheckLoginId(loginId);
+
+      if (typeof result?.available !== 'boolean') {
+        throw new Error('중복 확인 응답 형식이 올바르지 않습니다.');
+      }
+
+      setCheckedLoginId(loginId);
+      setIsLoginIdAvailable(result.available);
+      setIdMessage(
+        result.available
+          ? '사용 가능한 아이디입니다.'
+          : '이미 사용 중인 아이디입니다.',
+      );
+    } catch (error) {
+      setIdMessage(
+        error?.message || '아이디 중복 확인에 실패했습니다. 다시 시도해 주세요.',
+      );
+    } finally {
+      setIsCheckingId(false);
+    }
   }
 
   function formatPhone(value) {
@@ -117,6 +160,14 @@ export default function SignupPage({
 
     if (form.password !== form.confirmPassword) {
       setMessage('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    if (
+      checkedLoginId !== form.loginId.trim() ||
+      !isLoginIdAvailable
+    ) {
+      setMessage('사용 가능한 아이디인지 중복 확인해 주세요.');
       return;
     }
 
@@ -234,23 +285,28 @@ export default function SignupPage({
                   placeholder="아이디를 입력하세요"
                   value={form.loginId}
                   onChange={e => updateField('loginId', e.target.value)}
+                  maxLength={255}
                   required
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isCheckingId}
                 />
 
                 <button
                   type="button"
                   onClick={handleCheckId}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isCheckingId}
                   className="h-[43px] shrink-0 cursor-pointer rounded-md border border-[#456176] bg-[#172D3C] px-4 text-[14px] font-semibold text-[#E7EDF5] transition-colors hover:bg-[#234052] disabled:cursor-wait disabled:opacity-60"
                 >
-                  중복 확인
+                  {isCheckingId ? '확인 중…' : '중복 확인'}
                 </button>
               </div>
 
               {idMessage && (
                 <p
-                  className="mt-1 text-[12px] text-[#AFBDCB]"
+                  className={`mt-1 text-[12px] ${
+                    checkedLoginId && isLoginIdAvailable
+                      ? 'text-[#78D6A3]'
+                      : 'text-[#FF8A8A]'
+                  }`}
                   role="status"
                 >
                   {idMessage}
@@ -472,7 +528,7 @@ export default function SignupPage({
       
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCheckingId}
               className="mt-1 h-[43px] w-full cursor-pointer rounded-md bg-[#E87817] text-[15px] font-bold text-[#081720] transition-colors hover:bg-[#FF952E] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FF8418] disabled:cursor-wait disabled:opacity-60"
             >
               {isSubmitting ? '가입 처리 중…' : '회원가입'}

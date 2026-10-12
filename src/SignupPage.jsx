@@ -95,21 +95,14 @@ export default function SignupPage({
     setMessage('');
   }
 
-  async function handleCheckId() {
-    const loginId = form.loginId.trim();
-
-    if (!loginId) {
+  function handleCheckId() {
+    if (!form.loginId.trim()) {
       setIdMessage('아이디를 입력해 주세요.');
       return;
     }
 
     if (loginId.length > 255) {
       setIdMessage('아이디는 255자 이하로 입력해 주세요.');
-      return;
-    }
-
-    if (!onCheckLoginId) {
-      setIdMessage('아이디 중복 확인 API가 연결되지 않았습니다.');
       return;
     }
 
@@ -287,7 +280,7 @@ export default function SignupPage({
                   onChange={e => updateField('loginId', e.target.value)}
                   maxLength={255}
                   required
-                  disabled={isSubmitting || isCheckingId}
+                  disabled={isSubmitting}
                 />
 
                 <button
@@ -528,7 +521,7 @@ export default function SignupPage({
       
             <button
               type="submit"
-              disabled={isSubmitting || isCheckingId}
+              disabled={isSubmitting}
               className="mt-1 h-[43px] w-full cursor-pointer rounded-md bg-[#E87817] text-[15px] font-bold text-[#081720] transition-colors hover:bg-[#FF952E] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FF8418] disabled:cursor-wait disabled:opacity-60"
             >
               {isSubmitting ? '가입 처리 중…' : '회원가입'}

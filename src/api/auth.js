@@ -51,6 +51,13 @@ export function signup({ loginId, password, name, phone, email }) {
   });
 }
 
+export function checkLoginId(loginId) {
+  return request('/api/auth/check-loginId', {
+    method: 'POST',
+    body: JSON.stringify({ loginId }),
+  });
+}
+
 export async function login({ loginId, password }) {
   const auth = await request('/api/auth/login', {
     method: 'POST',

@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { logout } from '../api/auth';
 import AppHeader from '../components/layout/AppHeader';
 import Sidebar from '../components/layout/Sidebar';
-import { getPageTitle } from '../config/navigation';
 
 export default function AuthenticatedLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -21,7 +19,7 @@ export default function AuthenticatedLayout() {
 
       <div className="min-w-0">
         <AppHeader
-          title={getPageTitle(location.pathname)}
+          title="Safety Dashboard"
           onOpenSidebar={() => setSidebarOpen(true)}
           onLogout={handleLogout}
         />

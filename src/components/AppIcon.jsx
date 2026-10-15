@@ -8,6 +8,7 @@ const ICONS = {
   site: <><path d="M3 20h18M5 20V9l7-5v16M12 10h7v10M8 11h1M8 15h1M15 13h1M15 16h1" /></>,
   bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>,
   chevronDown: <path d="m8 10 4 4 4-4" />,
+  chevronLeft: <path d="m15 18-6-6 6-6" />,
   chevronRight: <path d="m9 6 6 6-6 6" />,
   warning: <><path d="M12 3 2.8 20h18.4L12 3Z" /><path d="M12 9v4.5M12 17h.01" /></>,
   flame: <path d="M13 2s1 4-2 7c-2-2-3-3-3-5-3 3-5 6-5 10a9 9 0 0 0 18 0c0-5-3-8-5-10 0 3-1 5-3 6 1-3 0-6 0-8Z" />,
@@ -23,6 +24,8 @@ const ICONS = {
   eye: <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></>,
   eyeOff: <path d="m3 3 18 18M10.6 5.1A12 12 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.1 6.1A19 19 0 0 0 2 12s3.5 7 10 7c1.7 0 3.2-.5 4.6-1.3M9.9 9.9a3 3 0 0 0 4.2 4.2" />,
   search: <><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></>,
+  calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
+  sort: <><path d="M4 7h16M4 12h11M4 17h6" /></>,
 };
 
 export default function AppIcon({ name, className = '', strokeWidth = 1.7 }) {

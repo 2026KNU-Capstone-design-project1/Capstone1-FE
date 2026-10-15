@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import AppIcon from './components/AppIcon';
+import RiskDetailModal from './components/risks/RiskDetailModal';
 import { riskManagementMock } from './data/riskManagementMock';
+import { formatDateTime, toTimestamp } from './utils/dateTime';
 
 const PAGE_SIZE = 10;
 
@@ -40,11 +42,12 @@ export default function RiskManagementPage() {
   const [period, setPeriod] = useState('all');
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
+  const [selectedRisk, setSelectedRisk] = useState(null);
 
   const risksWithDisplayCode = useMemo(() => {
     const displayCodeById = new Map(
       [...riskManagementMock]
-        .sort((a, b) => a.lastDetected.localeCompare(b.lastDetected))
+        .sort((a, b) => toTimestamp(a.lastDetected) - toTimestamp(b.lastDetected))
         .map((risk, index) => [risk.id, `RISK-${String(index + 1).padStart(3, '0')}`]),
     );
 
@@ -63,19 +66,19 @@ export default function RiskManagementPage() {
 
   const risks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
-    const periodStart = period === '7d' ? '2026.10.02' : period === '30d' ? '2026.09.09' : '';
+    const periodStart = period === '7d' ? toTimestamp('2026.10.02 00:00:00') : period === '30d' ? toTimestamp('2026.09.09 00:00:00') : 0;
 
     const filteredRisks = risksWithDisplayCode
       .filter(risk => !normalizedQuery || `${risk.content} ${risk.location}`.toLocaleLowerCase('ko-KR').includes(normalizedQuery))
       .filter(risk => area === 'all' || risk.location.startsWith(area))
       .filter(risk => severity === 'all' || risk.severity === severity)
       .filter(risk => status === 'all' || risk.status === status)
-      .filter(risk => !periodStart || risk.lastDetected.slice(0, 10) >= periodStart);
+      .filter(risk => !periodStart || toTimestamp(risk.lastDetected) >= periodStart);
 
     return filteredRisks.sort((a, b) => {
       const detectedOrder = sort === 'latest'
-        ? b.lastDetected.localeCompare(a.lastDetected)
-        : a.lastDetected.localeCompare(b.lastDetected);
+        ? toTimestamp(b.lastDetected) - toTimestamp(a.lastDetected)
+        : toTimestamp(a.lastDetected) - toTimestamp(b.lastDetected);
 
       if (detectedOrder !== 0) return detectedOrder;
 
@@ -175,14 +178,27 @@ export default function RiskManagementPage() {
           </thead>
           <tbody>
             {pageRisks.map(risk => (
-              <tr key={risk.id} className="h-12 border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-app-hover">
+              <tr
+                key={risk.id}
+                className="h-12 cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
+                tabIndex="0"
+                role="button"
+                aria-label={`${risk.displayCode} ${risk.content} 상세 보기`}
+                onClick={() => setSelectedRisk(risk)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setSelectedRisk(risk);
+                  }
+                }}
+              >
                 <td className="border-r border-app-border-soft px-5 text-app-text-soft">{risk.displayCode}</td>
                 <td className="truncate border-r border-app-border-soft px-5 font-medium text-app-text">{risk.content}</td>
                 <td className="truncate border-r border-app-border-soft px-5">{risk.location}</td>
                 <td className={`border-r border-app-border-soft px-5 text-center ${severityTone[risk.severity]}`}>{risk.severity}</td>
                 <td className={`border-r border-app-border-soft px-5 text-center ${statusTone[risk.status]}`}>{risk.status}</td>
-                <td className="border-r border-app-border-soft px-5">{risk.firstDetected}</td>
-                <td className="border-r border-app-border-soft px-5">{risk.lastDetected}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.firstDetected)}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.lastDetected)}</td>
                 <td className="border-r border-app-border-soft px-5">{risk.videos}개</td>
                 <td className="px-5">{risk.assignee}</td>
               </tr>
@@ -196,7 +212,7 @@ export default function RiskManagementPage() {
         </table>
       </div>
 
-      <div className="flex min-h-[68px] items-center justify-between gap-4 border-t border-app-border-soft">
+      <div className="flex min-h-[78px] items-center justify-between gap-4 border-t border-app-border-soft pt-[20px]">
         <p className="text-[17px] text-[#9abbd0]">{start}-{end} / {risks.length}건</p>
         <nav className="flex items-center gap-[7px]" aria-label="위험 목록 페이지">
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => setPage(value => Math.max(1, value - 1))}><AppIcon name="chevronLeft" className="h-5 w-5" /></button>
@@ -206,6 +222,8 @@ export default function RiskManagementPage() {
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}><AppIcon name="chevronRight" className="h-5 w-5" /></button>
         </nav>
       </div>
+
+      {selectedRisk && <RiskDetailModal risk={selectedRisk} onClose={() => setSelectedRisk(null)} />}
     </section>
   );
 }

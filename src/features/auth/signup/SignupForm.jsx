@@ -70,7 +70,7 @@ export default function SignupForm({ onCheckLoginId, onSignup, sites }) {
         label="비밀번호"
         value={form.password}
         onChange={value => signup.updateField('password', value)}
-        placeholder="비밀번호를 입력하세요"
+        placeholder="비밀번호는 8자 이상으로 설정해주세요"
         disabled={isSubmitting}
       />
 

@@ -54,6 +54,11 @@ a:focus-visible { outline: 2px solid var(--color-app-accent); outline-offset: 4p
 .app-shell { display: grid; grid-template-columns: minmax(0, 1fr); }
 .app-sidebar { width: var(--app-sidebar-width); }
 .app-content-frame { max-width: var(--app-content-max-width); margin-inline: auto; }
+.video-folder-scrollbar { scrollbar-width: thin; scrollbar-color: var(--color-app-border-strong) transparent; }
+.video-folder-scrollbar::-webkit-scrollbar { width: 8px; }
+.video-folder-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.video-folder-scrollbar::-webkit-scrollbar-thumb { background: var(--color-app-border-strong); border: 2px solid var(--color-app-background); border-radius: 999px; }
+.video-folder-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-app-border-hover); }
 
 @media (min-width: 1024px) {
   .app-shell { grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr); }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppIcon from './components/AppIcon';
 import { videoFoldersMock } from './data/videoFoldersMock';
 
@@ -16,7 +17,7 @@ function monthKey(date) {
   return date.slice(0, 7);
 }
 
-function FolderIcon({ className = '' }) {
+export function FolderIcon({ className = '' }) {
   return (
     <svg className={className} viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <path d="M3.5 8.5A2.5 2.5 0 0 1 6 6h6.2l2.5 3H26a2.5 2.5 0 0 1 2.5 2.5v1H3.5v-4Z" fill="#f58a2b" />
@@ -25,7 +26,7 @@ function FolderIcon({ className = '' }) {
   );
 }
 
-function UploadIcon({ className = '' }) {
+export function UploadIcon({ className = '' }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
@@ -33,7 +34,7 @@ function UploadIcon({ className = '' }) {
   );
 }
 
-function FailureIcon({ className = '' }) {
+export function FailureIcon({ className = '' }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <circle cx="10" cy="10" r="8" fill="currentColor" />
@@ -42,7 +43,7 @@ function FailureIcon({ className = '' }) {
   );
 }
 
-function FilterSelect({ label, value, onChange, children, icon }) {
+export function FilterSelect({ label, value, onChange, children, icon }) {
   return (
     <label className="relative block min-w-0">
       <span className="sr-only">{label}</span>
@@ -59,11 +60,23 @@ function FilterSelect({ label, value, onChange, children, icon }) {
   );
 }
 
-function FolderCard({ folder }) {
+function FolderCard({ folder, onOpen }) {
   const allResolved = folder.unresolvedCount === 0;
 
   return (
-    <article className="group flex min-h-[190px] flex-col rounded-xl border border-app-border bg-[#071c28] px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-[#09212e]">
+    <article
+      className="group flex min-h-[190px] cursor-pointer flex-col rounded-xl border border-app-border bg-[#071c28] px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-[#09212e] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
+      role="link"
+      tabIndex="0"
+      aria-label={`${folder.date} 영상 폴더 열기`}
+      onClick={onOpen}
+      onKeyDown={event => {
+        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
+    >
       <div className="flex items-start gap-4">
         <FolderIcon className="h-[34px] w-[34px] shrink-0" />
         <div className="min-w-0 flex-1 pt-0.5">
@@ -72,7 +85,7 @@ function FolderCard({ folder }) {
             영상 {folder.videoCount}개 <span className="mx-1 text-app-muted">·</span> 분석 완료 {folder.analyzedCount}/{folder.videoCount}
           </p>
         </div>
-        <button className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-app-text-soft transition-colors hover:bg-[#14303f] hover:text-white" type="button" aria-label={`${folder.date} 폴더 메뉴`}>
+        <button className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-app-text-soft transition-colors hover:bg-[#14303f] hover:text-white" type="button" aria-label={`${folder.date} 폴더 메뉴`} onClick={event => event.stopPropagation()}>
           <AppIcon name="more" className="h-5 w-5" />
         </button>
       </div>
@@ -106,6 +119,7 @@ function FolderCard({ folder }) {
 }
 
 export default function VideoManagementPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [period, setPeriod] = useState('all');
   const [status, setStatus] = useState('all');
@@ -150,8 +164,12 @@ export default function VideoManagementPage() {
   return (
     <section className="flex h-[calc(100dvh-125px)] min-h-[540px] flex-col overflow-hidden" aria-labelledby="video-management-title">
       <div className="shrink-0 pb-[18px]">
-        <div className="mb-[18px] flex items-center justify-between gap-4">
-          <h2 id="video-management-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">영상 관리</h2>
+        <div className="mb-[18px] flex min-h-[48px] items-start justify-between gap-4">
+          <h2 id="video-management-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">
+            <button className="rounded bg-transparent p-0 text-inherit" type="button" onClick={() => window.location.reload()} aria-label="영상 관리 폴더 새로고침">
+              영상 관리
+            </button>
+          </h2>
           <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="button">
             <UploadIcon className="h-5 w-5" />
             영상 업로드
@@ -207,7 +225,7 @@ export default function VideoManagementPage() {
               </button>
               {!collapsed && (
                 <div className="grid grid-cols-1 gap-3 pt-3 md:grid-cols-2 xl:grid-cols-3">
-                  {group.folders.map(folder => <FolderCard key={folder.date} folder={folder} />)}
+                  {group.folders.map(folder => <FolderCard key={folder.date} folder={folder} onOpen={() => navigate(`/videos/${folder.date}`)} />)}
                 </div>
               )}
             </section>

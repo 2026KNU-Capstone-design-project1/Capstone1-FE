@@ -98,7 +98,9 @@ export default function RiskManagementPage() {
 
   return (
     <section className="pb-1" aria-labelledby="risk-management-title">
-      <h2 id="risk-management-title" className="mb-[26px] text-[28px] font-bold tracking-[-.7px] text-app-text">위험 관리</h2>
+      <div className="mb-[18px] flex min-h-[48px] items-start justify-between gap-4">
+        <h2 id="risk-management-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">위험 관리</h2>
+      </div>
 
       <div className="grid gap-3 rounded-xl border border-app-border bg-[#071b27] p-[14px] md:grid-cols-2 xl:grid-cols-[minmax(260px,2.2fr)_minmax(140px,1fr)_minmax(140px,.94fr)_minmax(140px,1fr)_minmax(210px,1.35fr)_minmax(180px,1.16fr)]">
         <label className="relative block min-w-0">

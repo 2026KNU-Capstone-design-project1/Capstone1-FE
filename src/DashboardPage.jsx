@@ -15,25 +15,25 @@ export default function DashboardPage() {
       </section>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_390px]">
-        <section className="relative min-h-[520px] overflow-hidden rounded-xl border border-app-border bg-app-panel" aria-label={view === 'map' ? '3D Map' : '위험 목록'}>
-          <div className="absolute top-3 left-4 z-10 flex gap-4">
+        <section className="flex min-h-[520px] flex-col overflow-hidden rounded-xl border border-app-border bg-app-panel" aria-label={view === 'map' ? '3D Map' : '위험 목록'}>
+          <div className="flex h-[50px] shrink-0 items-stretch gap-3 border-b border-app-border-soft px-5">
             <button
-              className={`h-8 min-w-[98px] cursor-pointer rounded-lg border px-4 text-[12px] font-bold transition-colors ${view === 'map' ? 'border-[#df760f] bg-[#17262f] text-white' : 'border-[#314b5b] bg-[#0d202b] text-[#a7b6c1] hover:bg-[#17303d] hover:text-white'}`}
+              className={`relative min-w-[88px] cursor-pointer px-3 text-[13px] font-bold transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:transition-colors ${view === 'map' ? 'text-app-text after:bg-app-accent' : 'text-app-muted after:bg-transparent hover:text-app-text'}`}
               type="button"
               onClick={() => setView('map')}
               aria-pressed={view === 'map'}
             >3D Map</button>
             <button
-              className={`h-8 min-w-[98px] cursor-pointer rounded-lg border px-4 text-[12px] font-bold transition-colors ${view === 'list' ? 'border-[#df760f] bg-[#17262f] text-white' : 'border-[#314b5b] bg-[#0d202b] text-[#a7b6c1] hover:bg-[#17303d] hover:text-white'}`}
+              className={`relative min-w-[88px] cursor-pointer px-3 text-[13px] font-medium transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:transition-colors ${view === 'list' ? 'text-app-text after:bg-app-accent' : 'text-app-muted after:bg-transparent hover:text-app-text'}`}
               type="button"
               onClick={() => setView('list')}
               aria-pressed={view === 'list'}
             >List View</button>
           </div>
           {view === 'map' ? (
-            <div className="h-full min-h-[520px]" aria-label="3D Map 영역 - 추후 구현" />
+            <div className="min-h-[470px] flex-1" aria-label="3D Map 영역 - 추후 구현" />
           ) : (
-            <div className="overflow-x-auto px-4 pt-16 pb-5">
+            <div className="overflow-x-auto px-4 py-5">
               <table className="w-full min-w-[720px] border-collapse text-left text-[13px]">
                 <thead className="text-app-muted">
                   <tr className="border-b border-app-border">

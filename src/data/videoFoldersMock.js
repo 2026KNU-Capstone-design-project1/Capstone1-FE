@@ -1,0 +1,18 @@
+export const videoFoldersMock = [
+  { date: '2026-10-19', videoCount: 8, analyzedCount: 6, riskIssueCount: 6, highRiskCount: 2, unresolvedCount: 3, analysisFailedCount: 1 },
+  { date: '2026-10-18', videoCount: 12, analyzedCount: 12, riskIssueCount: 2, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+  { date: '2026-10-15', videoCount: 6, analyzedCount: 4, riskIssueCount: 3, highRiskCount: 1, unresolvedCount: 2, analysisFailedCount: 0 },
+  { date: '2026-10-08', videoCount: 8, analyzedCount: 7, riskIssueCount: 1, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 1 },
+  { date: '2026-10-03', videoCount: 3, analyzedCount: 3, riskIssueCount: 1, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+  { date: '2026-09-24', videoCount: 4, analyzedCount: 4, riskIssueCount: 4, highRiskCount: 1, unresolvedCount: 1, analysisFailedCount: 0 },
+  { date: '2026-09-18', videoCount: 7, analyzedCount: 5, riskIssueCount: 2, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+  { date: '2026-09-12', videoCount: 5, analyzedCount: 2, riskIssueCount: 5, highRiskCount: 2, unresolvedCount: 4, analysisFailedCount: 1 },
+  { date: '2026-09-04', videoCount: 9, analyzedCount: 9, riskIssueCount: 3, highRiskCount: 1, unresolvedCount: 1, analysisFailedCount: 0 },
+  { date: '2026-08-27', videoCount: 11, analyzedCount: 8, riskIssueCount: 7, highRiskCount: 2, unresolvedCount: 3, analysisFailedCount: 1 },
+  { date: '2026-08-19', videoCount: 6, analyzedCount: 6, riskIssueCount: 1, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+  { date: '2026-08-11', videoCount: 10, analyzedCount: 7, riskIssueCount: 4, highRiskCount: 1, unresolvedCount: 2, analysisFailedCount: 0 },
+  { date: '2026-08-02', videoCount: 4, analyzedCount: 4, riskIssueCount: 2, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+  { date: '2026-07-28', videoCount: 7, analyzedCount: 3, riskIssueCount: 5, highRiskCount: 2, unresolvedCount: 3, analysisFailedCount: 1 },
+  { date: '2026-07-14', videoCount: 5, analyzedCount: 5, riskIssueCount: 3, highRiskCount: 1, unresolvedCount: 1, analysisFailedCount: 0 },
+  { date: '2026-07-03', videoCount: 8, analyzedCount: 6, riskIssueCount: 2, highRiskCount: 0, unresolvedCount: 0, analysisFailedCount: 0 },
+];

@@ -17,10 +17,10 @@ export const dashboardMock = {
     role: 'Admin',
   },
   metrics: [
-    { id: 'total', label: '전체 미처리 위험', value: 24, icon: 'warning', tone: 'red' },
-    { id: 'high', label: '고위험 미처리 건수', value: 2, icon: 'flame', tone: 'red' },
-    { id: 'longTerm', label: '장기 미처리 위험', value: 4, icon: 'document', tone: 'blue' },
-    { id: 'average', label: '평균 해결 시간', value: 2.5, suffix: '일', icon: 'clock', tone: 'green' },
+    { id: 'total', label: '전체 미처리 위험', value: 24, icon: 'warning', tone: 'neutral' },
+    { id: 'high', label: '고위험 미처리 건수', value: 2, icon: 'flame', tone: 'danger' },
+    { id: 'longTerm', label: '장기 미처리 위험', value: 4, icon: 'document', tone: 'neutral' },
+    { id: 'average', label: '평균 해결 시간', value: 2.5, suffix: '일', icon: 'clock', tone: 'neutral' },
   ],
   featuredRisk: {
     id: 'RISK-20261017-001',

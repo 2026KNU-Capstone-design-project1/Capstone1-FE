@@ -169,8 +169,8 @@ export default function RiskManagementPage() {
             value={sort}
             onChange={update(setSort)}
           >
-            <option value="latest">최근 발견일시순</option>
-            <option value="oldest">오래된 발견일시순</option>
+            <option value="latest">최신순 </option>
+            <option value="oldest">오래된순</option>
           </select>
           <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
         </label>
@@ -183,8 +183,8 @@ export default function RiskManagementPage() {
       <div className="overflow-x-auto rounded-t-xl border border-app-border border-b-0">
         <table className="w-full min-w-[1220px] table-fixed border-collapse text-left text-[16px]">
           <colgroup>
-            <col className="w-[8%]" /><col className="w-[15%]" /><col className="w-[13.5%]" /><col className="w-[8.5%]" /><col className="w-[8.5%]" />
-            <col className="w-[12.5%]" /><col className="w-[12.5%]" /><col className="w-[8.5%]" /><col className="w-[12.5%]" />
+            <col className="w-[8%]" /><col className="w-[18%]" /><col className="w-[13.5%]" /><col className="w-[8.5%]" /><col className="w-[8.5%]" />
+            <col className="w-[12.5%]" /><col className="w-[12.5%]" /><col className="w-[8.5%]" /><col className="w-[9.5%]" />
           </colgroup>
           <thead className="bg-[#0a2230] text-app-text-soft">
             <tr className="h-[51px]">

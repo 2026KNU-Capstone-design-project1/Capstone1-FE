@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import MetricCard from './components/dashboard/MetricCard';
 import RecentAlerts from './components/dashboard/RecentAlerts';
 import RiskDetailCard from './components/dashboard/RiskDetailCard';
 import { dashboardMock } from './data/dashboardMock';
+
+const Factory3DView = lazy(() => import('./components/dashboard/Factory3DView'));
+const FACTORY_MODEL_URL = `${import.meta.env.BASE_URL}models/factory_large.glb`;
+
+function MapLoadingFallback() {
+  return (
+    <div className="grid min-h-[470px] flex-1 place-items-center bg-[#091f2c]" role="status">
+      <p className="text-xs font-medium text-app-muted">3D 뷰어 준비 중...</p>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const dashboard = dashboardMock;
@@ -31,7 +42,9 @@ export default function DashboardPage() {
             >List View</button>
           </div>
           {view === 'map' ? (
-            <div className="min-h-[470px] flex-1" aria-label="3D Map 영역 - 추후 구현" />
+            <Suspense fallback={<MapLoadingFallback />}>
+              <Factory3DView modelUrl={FACTORY_MODEL_URL} riskZones={dashboard.riskZones} />
+            </Suspense>
           ) : (
             <div className="overflow-x-auto px-4 py-5">
               <table className="w-full min-w-[720px] border-collapse text-left text-[13px]">

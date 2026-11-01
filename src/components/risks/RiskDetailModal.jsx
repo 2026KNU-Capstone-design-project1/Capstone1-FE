@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import riskDetailImage from '../../assets/risk-detail.png';
+import riskDetailImage from '../../assets/construction-site-pipe.jpg';
 import { dashboardMock } from '../../data/dashboardMock';
 import { formatDateTime } from '../../utils/dateTime';
 import AppIcon from '../AppIcon';

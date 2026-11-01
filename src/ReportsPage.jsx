@@ -336,10 +336,12 @@ export default function ReportsPage() {
     <section className="w-full min-w-0 pb-1" style={{ maxWidth: 'calc(100vw - 40px)' }} aria-labelledby="reports-title">
       <div className="mb-2 flex min-h-[48px] items-start justify-between gap-4">
         <h2 id="reports-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">AI 보고서</h2>
+        {/*}
         <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="button" onClick={() => setCreateOpen(true)}>
           <AppIcon name="plus" className="h-5 w-5" strokeWidth={2} />
           보고서 생성
         </button>
+        */}
       </div>
 
       <div className="mb-[15px] flex gap-1 border-b border-app-border-soft" role="tablist" aria-label="보고서 분류">

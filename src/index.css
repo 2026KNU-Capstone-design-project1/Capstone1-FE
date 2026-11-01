@@ -59,9 +59,31 @@ a:focus-visible { outline: 2px solid var(--color-app-accent); outline-offset: 4p
 .video-folder-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .video-folder-scrollbar::-webkit-scrollbar-thumb { background: var(--color-app-border-strong); border: 2px solid var(--color-app-background); border-radius: 999px; }
 .video-folder-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-app-border-hover); }
+.report-detail-section { width: calc(100% + 13px); margin-left: -5px; }
+.report-detail-heading { position: relative; height: 108px; }
+.report-detail-back { position: absolute; top: 0; left: 7px; font-size: 14px; line-height: 20px; }
+.report-detail-title { position: absolute; top: 34px; right: 220px; left: 2px; font-size: 30px; line-height: 38px; letter-spacing: -.7px; }
+.report-detail-meta { position: absolute; top: 75px; left: 4px; font-size: 14px; line-height: 20px; }
+.report-detail-download { position: absolute; top: 25px; right: 0; width: 173px; height: 46px; justify-content: center; font-size: 14px; }
+.report-preview-toolbar { height: 54px; }
+.report-preview-viewport { height: calc(100dvh - 295px); min-height: 520px; }
+.report-preview-frame { display: block; width: 100%; height: 100%; border: 0; background: #132f40; }
 
 @media (min-width: 1024px) {
   .app-shell { grid-template-columns: var(--app-sidebar-width) minmax(0, 1fr); }
+}
+
+@media (max-width: 639px) {
+  .report-detail-section { width: 100%; margin-left: 0; }
+  .report-detail-heading { display: flex; height: auto; flex-direction: column; gap: 8px; padding-bottom: 12px; }
+  .report-detail-back, .report-detail-title, .report-detail-meta, .report-detail-download { position: static; }
+  .report-detail-title { order: 2; font-size: 22px; line-height: 30px; }
+  .report-detail-meta { order: 3; }
+  .report-detail-download { order: 4; width: 100%; justify-content: center; margin-top: 4px; }
+  .report-detail-heading > div { display: contents; }
+  .report-detail-back { order: 1; }
+  .report-preview-toolbar { height: 40px; }
+  .report-preview-viewport { height: calc(100dvh - 320px); min-height: 400px; }
 }
 
 @media (min-width: 1800px) {

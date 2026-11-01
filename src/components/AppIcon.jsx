@@ -33,6 +33,11 @@ const ICONS = {
   search: <><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></>,
   calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
   sort: <><path d="M4 7h16M4 12h11M4 17h6" /></>,
+  plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
+  download: <><path d="M12 3v12m0 0 5-5m-5 5-5-5" /><path d="M5 17v3h14v-3" /></>,
+  copy: <><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></>,
+  trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></>,
 };
 
 export default function AppIcon({ name, className = '', strokeWidth = 1.7 }) {

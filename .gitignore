@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated report files
+output/pdf/
+tmp/output/pdf/

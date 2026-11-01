@@ -14,10 +14,10 @@ const severityTone = {
 const statusTone = {
   미처리: 'text-app-danger',
   처리중: 'text-app-muted',
-  '해결 완료': 'text-[#28d28b]',
+  '처리 완료': 'text-[#28d28b]',
 };
 
-const STATUS_OPTIONS = ['미처리', '처리중', '해결 완료'];
+const STATUS_OPTIONS = ['미처리', '처리중', '처리 완료'];
 
 function getRiskType(content) {
   if (/난간|추락|계단|고소/.test(content)) return '추락 위험';
@@ -29,14 +29,12 @@ function getRiskType(content) {
 }
 
 function makeFallbackHistory(risk) {
-  const history = [{ detectedAt: risk.firstDetected, description: '최초 탐지' }];
-  if (risk.lastDetected !== risk.firstDetected || risk.status !== '미처리') {
-    const description = risk.status === '해결 완료'
-      ? `해결 완료${risk.assignee !== '미배정' ? ` · ${risk.assignee}` : ''}`
-      : risk.status === '처리중'
-        ? `처리중으로 변경${risk.assignee !== '미배정' ? ` · ${risk.assignee}` : ''}`
-        : '위험 재탐지';
-    history.push({ detectedAt: risk.lastDetected, description });
+  const history = [{ detectedAt: risk.detectedAt, description: '위험 발견' }];
+  if (risk.resolvedAt) {
+    history.push({
+      detectedAt: risk.resolvedAt,
+      description: `처리 완료${risk.assignee !== '미배정' ? ` · ${risk.assignee}` : ''}`,
+    });
   }
   return history;
 }
@@ -51,7 +49,6 @@ export default function RiskDetailModal({ risk, onClose }) {
     () => risk.history?.length ? risk.history : makeFallbackHistory(risk),
     [risk],
   );
-  const [area = '-', facility = '-'] = risk.location.split(' · ');
 
   useEffect(() => {
     const previouslyFocused = document.activeElement;
@@ -133,10 +130,9 @@ export default function RiskDetailModal({ risk, onClose }) {
 
             <dl className="grid content-start grid-cols-[78px_minmax(0,1fr)] gap-x-4 gap-y-5 pt-1 text-[15px]">
               <dt className="text-app-muted">현장:</dt><dd className="break-words text-app-text">{risk.site ?? dashboardMock.site.name}</dd>
-              <dt className="text-app-muted">구역:</dt><dd>{area}</dd>
-              <dt className="text-app-muted">시설물:</dt><dd>{facility}</dd>
-              <dt className="text-app-muted">최초 발견:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.firstDetected)}</dd>
-              <dt className="text-app-muted">최근 발견:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.lastDetected)}</dd>
+              <dt className="text-app-muted">위치:</dt><dd>{risk.location}</dd>
+              <dt className="text-app-muted">발견일시:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.detectedAt)}</dd>
+              <dt className="text-app-muted">해결일시:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.resolvedAt)}</dd>
               <dt className="text-app-muted">관련 영상:</dt><dd>{risk.videos}개</dd>
               <dt className="text-app-muted">담당자:</dt><dd>{risk.assignee}</dd>
             </dl>

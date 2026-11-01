@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getRisks } from './api/risks';
 import AppIcon from './components/AppIcon';
 import RiskDetailModal from './components/risks/RiskDetailModal';
-import { riskManagementMock } from './data/riskManagementMock';
 import { formatDateTime, toTimestamp } from './utils/dateTime';
 
 const PAGE_SIZE = 10;
@@ -15,7 +15,7 @@ const severityTone = {
 const statusTone = {
   미처리: 'text-app-danger',
   처리중: 'text-app-muted',
-  '해결 완료': 'text-[#28d28b]',
+  '처리 완료': 'text-[#28d28b]',
 };
 
 function FilterSelect({ label, value, onChange, children, className = '' }) {
@@ -43,18 +43,32 @@ export default function RiskManagementPage() {
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
   const [selectedRisk, setSelectedRisk] = useState(null);
+  const [riskItems, setRiskItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [loadedAt, setLoadedAt] = useState(0);
 
-  const risksWithDisplayCode = useMemo(() => {
-    const displayCodeById = new Map(
-      [...riskManagementMock]
-        .sort((a, b) => toTimestamp(a.lastDetected) - toTimestamp(b.lastDetected))
-        .map((risk, index) => [risk.id, `RISK-${String(index + 1).padStart(3, '0')}`]),
-    );
+  useEffect(() => {
+    const controller = new AbortController();
 
-    return riskManagementMock.map(risk => ({
-      ...risk,
-      displayCode: displayCodeById.get(risk.id),
-    }));
+    async function loadRisks() {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        setRiskItems(await getRisks({ signal: controller.signal }));
+        setLoadedAt(Date.now());
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setError(requestError.message || '위험 목록을 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    loadRisks();
+    return () => controller.abort();
   }, []);
 
   function update(setter) {
@@ -66,19 +80,20 @@ export default function RiskManagementPage() {
 
   const risks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
-    const periodStart = period === '7d' ? toTimestamp('2026.10.02 00:00:00') : period === '30d' ? toTimestamp('2026.09.09 00:00:00') : 0;
+    const periodDays = period === '7d' ? 7 : period === '30d' ? 30 : 0;
+    const periodStart = periodDays && loadedAt ? loadedAt - periodDays * 24 * 60 * 60 * 1000 : 0;
 
-    const filteredRisks = risksWithDisplayCode
+    const filteredRisks = riskItems
       .filter(risk => !normalizedQuery || `${risk.content} ${risk.location}`.toLocaleLowerCase('ko-KR').includes(normalizedQuery))
       .filter(risk => area === 'all' || risk.location.startsWith(area))
       .filter(risk => severity === 'all' || risk.severity === severity)
       .filter(risk => status === 'all' || risk.status === status)
-      .filter(risk => !periodStart || toTimestamp(risk.lastDetected) >= periodStart);
+      .filter(risk => !periodStart || toTimestamp(risk.detectedAt) >= periodStart);
 
     return filteredRisks.sort((a, b) => {
       const detectedOrder = sort === 'latest'
-        ? toTimestamp(b.lastDetected) - toTimestamp(a.lastDetected)
-        : toTimestamp(a.lastDetected) - toTimestamp(b.lastDetected);
+        ? toTimestamp(b.detectedAt) - toTimestamp(a.detectedAt)
+        : toTimestamp(a.detectedAt) - toTimestamp(b.detectedAt);
 
       if (detectedOrder !== 0) return detectedOrder;
 
@@ -88,7 +103,7 @@ export default function RiskManagementPage() {
         ? bDisplayNumber - aDisplayNumber
         : aDisplayNumber - bDisplayNumber;
     });
-  }, [area, period, query, risksWithDisplayCode, severity, sort, status]);
+  }, [area, loadedAt, period, query, riskItems, severity, sort, status]);
 
   const pageCount = Math.max(1, Math.ceil(risks.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
@@ -109,7 +124,7 @@ export default function RiskManagementPage() {
           <input
             className="h-[46px] w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-[#54839c] hover:border-app-border-hover focus:border-app-accent"
             type="search"
-            placeholder="위험 내용 또는 시설물 검색"
+            placeholder="위험 내용 또는 위치 검색"
             value={query}
             onChange={update(setQuery)}
           />
@@ -130,7 +145,7 @@ export default function RiskManagementPage() {
           <option value="all">처리 상태</option>
           <option value="미처리">미처리</option>
           <option value="처리중">처리중</option>
-          <option value="해결 완료">해결 완료</option>
+          <option value="처리 완료">처리 완료</option>
         </FilterSelect>
         <label className="relative block min-w-0 border-l border-app-border-soft pl-3">
           <span className="sr-only">발견 기간</span>
@@ -154,8 +169,8 @@ export default function RiskManagementPage() {
             value={sort}
             onChange={update(setSort)}
           >
-            <option value="latest">최근 발견순</option>
-            <option value="oldest">오래된 발견순</option>
+            <option value="latest">최근 발견일시순</option>
+            <option value="oldest">오래된 발견일시순</option>
           </select>
           <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
         </label>
@@ -173,7 +188,7 @@ export default function RiskManagementPage() {
           </colgroup>
           <thead className="bg-[#0a2230] text-app-text-soft">
             <tr className="h-[51px]">
-              {['ID', '위험 내용', '위치', '위험 등급', '처리 상태', '최초 발견', '최근 발견', '관련 영상', '담당자'].map(label => (
+              {['ID', '위험 내용', '위치', '위험 등급', '처리 상태', '발견일시', '해결일시', '관련 영상', '담당자'].map(label => (
                 <th key={label} className="border-r border-app-border-soft px-5 font-medium last:border-r-0">{label}</th>
               ))}
             </tr>
@@ -199,15 +214,20 @@ export default function RiskManagementPage() {
                 <td className="truncate border-r border-app-border-soft px-5">{risk.location}</td>
                 <td className={`border-r border-app-border-soft px-5 text-center ${severityTone[risk.severity]}`}>{risk.severity}</td>
                 <td className={`border-r border-app-border-soft px-5 text-center ${statusTone[risk.status]}`}>{risk.status}</td>
-                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.firstDetected)}</td>
-                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.lastDetected)}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.detectedAt)}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-3">{formatDateTime(risk.resolvedAt)}</td>
                 <td className="border-r border-app-border-soft px-5">{risk.videos}개</td>
                 <td className="px-5">{risk.assignee}</td>
               </tr>
             ))}
-            {pageRisks.length === 0 && (
+            {!isLoading && pageRisks.length === 0 && (
               <tr className="h-48 border-t border-app-border-soft bg-[#061b26]">
-                <td colSpan="9" className="text-center text-app-muted">조건에 맞는 위험이 없습니다.</td>
+                <td colSpan="9" className="text-center text-app-muted">{error || '조건에 맞는 위험이 없습니다.'}</td>
+              </tr>
+            )}
+            {isLoading && (
+              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]">
+                <td colSpan="9" className="text-center text-app-muted">위험 목록을 불러오는 중입니다.</td>
               </tr>
             )}
           </tbody>

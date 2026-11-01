@@ -1,0 +1,83 @@
+
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Package build files
+        run: tar -czf frontend.tar.gz -C dist .
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload frontend to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            frontend.tar.gz \
+            ubuntu@"$EC2_HOST":/home/ubuntu/frontend.tar.gz
+
+      - name: Deploy static files
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            ubuntu@"$EC2_HOST" 'bash -se' <<'REMOTE'
+          set -e
+
+          mkdir -p /home/ubuntu/frontend-stage
+          rm -rf /home/ubuntu/frontend-stage/*
+          tar -xzf /home/ubuntu/frontend.tar.gz \
+            -C /home/ubuntu/frontend-stage
+
+          sudo -n mkdir -p /var/www/observer
+          sudo -n rsync -a --delete \
+            /home/ubuntu/frontend-stage/ \
+            /var/www/observer/
+
+          rm -f /home/ubuntu/frontend.tar.gz
+
+          echo "Frontend deployment completed"
+          REMOTE

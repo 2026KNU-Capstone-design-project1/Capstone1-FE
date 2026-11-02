@@ -4,13 +4,12 @@ import AppIcon from './components/AppIcon';
 import { IndividualRiskPdfDocument } from './components/reports/IndividualRiskPdfDocument';
 import PdfPreviewWorkspace from './components/reports/PdfPreviewWorkspace';
 import { buildIndividualRiskPdfData, individualRiskPdfFileName } from './data/individualReportPdfMock';
-import { individualRiskReportMock } from './data/reportMock';
 
 export default function IndividualReportDetailPage() {
-  const { riskId } = useParams();
+  const { reportId } = useParams();
   const location = useLocation();
   const [zoom, setZoom] = useState(100);
-  const risk = location.state?.risk ?? individualRiskReportMock.find(item => item.id === riskId);
+  const risk = location.state?.risk?.reportId === Number(reportId) ? location.state.risk : null;
   const pdfData = useMemo(() => risk ? buildIndividualRiskPdfData(risk) : null, [risk]);
   const pdfDocument = useMemo(() => pdfData ? <IndividualRiskPdfDocument data={pdfData} /> : null, [pdfData]);
 

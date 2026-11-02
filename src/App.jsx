@@ -37,7 +37,7 @@ export default function App() {
           <Route path="/videos/:date" element={<VideoFolderPage />} />
           <Route path="/history" element={<PlaceholderPage title="위험 이력" />} />
           <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/reports/individual/:riskId" element={<Suspense fallback={<div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">개별 PDF 보고서를 불러오고 있습니다…</div>}><IndividualReportDetailPage /></Suspense>} />
+          <Route path="/reports/individual/:reportId" element={<Suspense fallback={<div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">개별 PDF 보고서를 불러오고 있습니다…</div>}><IndividualReportDetailPage /></Suspense>} />
           <Route path="/reports/:reportId" element={<Suspense fallback={<div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">PDF 보고서를 불러오고 있습니다…</div>}><ReportDetailPage /></Suspense>} />
           <Route path="/settings" element={<PlaceholderPage title="환경설정" />} />
         </Route>

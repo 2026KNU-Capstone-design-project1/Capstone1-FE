@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getReports } from './api/reports';
 import AppIcon from './components/AppIcon';
-import { individualRiskReportMock, reportMock } from './data/reportMock';
-import { toTimestamp } from './utils/dateTime';
+import { formatDateTime, toTimestamp } from './utils/dateTime';
 
 const PAGE_SIZE = 7;
 
@@ -17,24 +17,8 @@ const RISK_LEVEL_META = {
   LOW: 'border-[#4eb8ff]/30 bg-[#133149] text-[#69c3ff]',
 };
 
-const PROCESS_STATUS_META = {
-  처리완료: 'text-[#43d9a3]',
-  처리중: 'text-[#69c3ff]',
-  미처리: 'text-[#ff747d]',
-};
-
-function getProcessingStatus(risk) {
-  if (PROCESS_STATUS_META[risk.processingStatus]) return risk.processingStatus;
-  const riskNumber = Number(risk.id?.replace(/\D/g, '')) || 0;
-  return ['처리완료', '처리중', '미처리'][riskNumber % 3];
-}
-
 function displayDate(value) {
-  return value.replaceAll('-', '.');
-}
-
-function displayDateTime(value) {
-  return value.replaceAll('-', '.');
+  return value?.replaceAll('-', '.') ?? '-';
 }
 
 function nowDateTime() {
@@ -150,9 +134,9 @@ function ReportFormModal({ onClose, onCreate }) {
 
 export default function ReportsPage() {
   const navigate = useNavigate();
-  const [reports, setReports] = useState(reportMock);
-  const [riskReports, setRiskReports] = useState(individualRiskReportMock);
-  const [activeCategory, setActiveCategory] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'individual' ? 'individual' : 'summary');
+  const [reports, setReports] = useState([]);
+  const [riskReports, setRiskReports] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('individual');
   const [typeFilter, setTypeFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [period, setPeriod] = useState('all');
@@ -160,6 +144,38 @@ export default function ReportsPage() {
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('tab')) return;
+
+    url.searchParams.delete('tab');
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadReports() {
+      setIsLoading(true);
+      setLoadError('');
+
+      try {
+        setRiskReports(await getReports({ signal: controller.signal }));
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setLoadError(requestError.message || '보고서 목록을 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    loadReports();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     function closeMenu(event) {
@@ -190,16 +206,16 @@ export default function ReportsPage() {
     return [...source]
       .filter(item => {
         if (typeFilter === 'all') return true;
-        return activeCategory === 'summary' ? item.type === typeFilter : getProcessingStatus(item) === typeFilter;
+        return activeCategory === 'summary' ? item.type === typeFilter : item.riskType === typeFilter;
       })
       .filter(item => {
         if (!normalizedQuery) return true;
         const haystack = activeCategory === 'summary'
-          ? `${item.name} ${displayDate(item.analysisStart)} ${displayDate(item.analysisEnd)} ${displayDateTime(item.createdAt)}`
-          : `${item.id} ${item.riskContent} ${item.location} ${item.riskLevel} ${displayDateTime(item.createdAt)}`;
-        return haystack.includes(normalizedQuery);
+          ? `${item.name} ${displayDate(item.analysisStart)} ${displayDate(item.analysisEnd)} ${formatDateTime(item.createdAt)}`
+          : `${item.id} ${item.riskContent} ${item.location} ${item.riskType} ${item.riskLevel} ${formatDateTime(item.createdAt)}`;
+        return haystack.toLocaleLowerCase('ko-KR').replaceAll('-', '.').includes(normalizedQuery);
       })
-      .filter(item => period === 'all' || item.createdAt.slice(0, 7).replace('.', '-') === period)
+      .filter(item => period === 'all' || item.createdAt?.slice(0, 7).replace('.', '-') === period)
       .sort((a, b) => {
         if (sort === 'oldest') return toTimestamp(a.createdAt) - toTimestamp(b.createdAt);
         if (sort === 'name') return (a.name ?? a.riskContent).localeCompare(b.name ?? b.riskContent, 'ko-KR');
@@ -219,6 +235,9 @@ export default function ReportsPage() {
   const pageReports = filteredReports.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const start = filteredReports.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
   const end = Math.min(currentPage * PAGE_SIZE, filteredReports.length);
+
+  const riskTypes = useMemo(() => [...new Set(riskReports.map(report => report.riskType).filter(type => type && type !== '-'))].sort((a, b) => a.localeCompare(b, 'ko-KR')), [riskReports]);
+  const periods = useMemo(() => [...new Set(riskReports.map(report => report.createdAt?.slice(0, 7)).filter(Boolean))].sort().reverse(), [riskReports]);
 
   function createReport(values) {
     const nextNumber = reports.reduce((max, report) => Math.max(max, Number(report.id.replace('REPORT-', '')) || 0), 0) + 1;
@@ -304,7 +323,7 @@ export default function ReportsPage() {
   function changeCategory(category) {
     setActiveCategory(category);
     const url = new URL(window.location.href);
-    if (category === 'individual') url.searchParams.set('tab', 'individual');
+    if (category === 'summary') url.searchParams.set('tab', 'summary');
     else url.searchParams.delete('tab');
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`);
     setTypeFilter('all');
@@ -365,7 +384,7 @@ export default function ReportsPage() {
           <AppIcon name="search" className="pointer-events-none absolute top-1/2 left-4 h-[25px] w-[25px] -translate-y-1/2 text-app-text-soft" />
           <input className="h-[48px] w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-[#6f8796] hover:border-app-border-hover focus:border-app-accent" type="search" placeholder={activeCategory === 'summary' ? '보고서명 또는 기간 검색' : '위험 내용 또는 발견 위치 검색'} value={query} onChange={event => resetPage(setQuery)(event.target.value)} />
         </label>
-        <SelectField label={activeCategory === 'summary' ? '보고서 유형' : '처리 상태'} value={typeFilter} onChange={event => resetPage(setTypeFilter)(event.target.value)}>
+        <SelectField label={activeCategory === 'summary' ? '보고서 유형' : '위험 유형'} value={typeFilter} onChange={event => resetPage(setTypeFilter)(event.target.value)}>
           {activeCategory === 'summary' ? (
             <>
               <option value="all">전체 유형</option>
@@ -374,22 +393,17 @@ export default function ReportsPage() {
             </>
           ) : (
             <>
-              <option value="all">전체 처리 상태</option>
-              <option value="처리완료">처리완료</option>
-              <option value="처리중">처리중</option>
-              <option value="미처리">미처리</option>
+              <option value="all">전체 위험 유형</option>
+              {riskTypes.map(riskType => <option key={riskType} value={riskType}>{riskType}</option>)}
             </>
           )}
         </SelectField>
         <SelectField label="생성 기간" icon="calendar" value={period} onChange={event => resetPage(setPeriod)(event.target.value)}>
           <option value="all">전체 생성 기간</option>
-          <option value="2026-10">2026년 10월</option>
-          <option value="2026-09">2026년 9월</option>
-          <option value="2026-08">2026년 8월</option>
-          <option value="2026-07">2026년 7월</option>
-          <option value="2026-06">2026년 6월</option>
-          <option value="2026-05">2026년 5월</option>
-          <option value="2026-04">2026년 4월</option>
+          {periods.map(value => {
+            const [year, month] = value.split('-');
+            return <option key={value} value={value}>{year}년 {Number(month)}월</option>;
+          })}
         </SelectField>
         <SelectField label="정렬" icon="sort" value={sort} onChange={event => resetPage(setSort)(event.target.value)}>
           <option value="latest">최신 생성순</option>
@@ -412,14 +426,14 @@ export default function ReportsPage() {
             </colgroup>
           ) : (
             <colgroup>
-              <col className="w-[24%]" /><col className="w-[21%]" /><col className="w-[11%]" /><col className="w-[11%]" /><col className="w-[15%]" /><col className="w-[9%]" /><col className="w-[9%]" />
+              <col className="w-[24%]" /><col className="w-[21%]" /><col className="w-[11%]" /><col className="w-[11%]" /><col className="w-[11%]" /><col className="w-[13%]" /><col className="w-[9%]" />
             </colgroup>
           )}
           <thead className="bg-[#0a2230] text-app-text-soft">
             <tr className="h-[57px]">
               {(activeCategory === 'summary'
                 ? ['보고서명', '보고서 유형', '분석 기간', '포함 위험', '생성일', '생성 상태', '관리']
-                : ['위험 내용', '발견 위치', '위험 등급', '처리 상태', '생성일자', '생성 상태', '관리']
+                : ['위험 내용', '발견 위치', '위험 유형', '위험 등급', '생성 상태', '생성일자', '관리']
               ).map(label => <th key={label} className="border-r border-app-border-soft px-5 font-semibold last:border-r-0">{label}</th>)}
             </tr>
           </thead>
@@ -430,26 +444,26 @@ export default function ReportsPage() {
                 <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[62px] justify-center rounded-md px-3 py-1.5 font-bold ${TYPE_META[report.type].tone}`}>{TYPE_META[report.type].label}</span></td>
                 <td className="whitespace-nowrap border-r border-app-border-soft px-5">{displayDate(report.analysisStart)} ~ {displayDate(report.analysisEnd)}</td>
                 <td className="border-r border-app-border-soft px-5 text-center">{report.riskCount}건</td>
-                <td className="whitespace-nowrap border-r border-app-border-soft px-5">{displayDateTime(report.createdAt)}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-5">{formatDateTime(report.createdAt)}</td>
                 <td className="border-r border-app-border-soft px-5 font-semibold text-[#43d9a3]">{report.status}</td>
                 <td className="px-4">{renderManagement(report, index, report.name)}</td>
               </tr>
-            )) : pageReports.map((risk, index) => {
-              const processingStatus = getProcessingStatus(risk);
-              return (
-              <tr key={risk.id} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-[#09222f] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${risk.id} ${risk.riskContent} 상세 보기`} onClick={() => navigate(`/reports/individual/${risk.id}`, { state: { risk } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/individual/${risk.id}`, { state: { risk } }); } }}>
+            )) : pageReports.map((risk, index) => (
+              <tr key={risk.reportId} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-[#09222f] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${risk.id} ${risk.riskContent} 상세 보기`} onClick={() => navigate(`/reports/individual/${risk.reportId}`, { state: { risk } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/individual/${risk.reportId}`, { state: { risk } }); } }}>
                 <td className="border-r border-app-border-soft px-5"><div className="truncate font-medium text-app-text" title={risk.riskContent}>{risk.riskContent}</div><div className="mt-0.5 text-xs text-app-muted">{risk.id}</div></td>
                 <td className="truncate border-r border-app-border-soft px-5" title={risk.location}>{risk.location}</td>
+                <td className="truncate border-r border-app-border-soft px-5" title={risk.riskType}>{risk.riskType}</td>
                 <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[78px] justify-center rounded-md border px-3 py-1.5 text-[13px] font-bold ${RISK_LEVEL_META[risk.riskLevel]}`}>{risk.riskLevel}</span></td>
-                <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[72px] justify-center rounded-md border px-2 py-1.5 text-[13px] font-semibold ${PROCESS_STATUS_META[processingStatus]}`}>{processingStatus}</span></td>
-                <td className="whitespace-nowrap border-r border-app-border-soft px-5">{displayDateTime(risk.createdAt)}</td>
                 <td className="border-r border-app-border-soft px-5 font-semibold text-[#43d9a3]">{risk.status}</td>
+                <td className="whitespace-nowrap border-r border-app-border-soft px-5">{formatDateTime(risk.createdAt)}</td>
                 <td className="px-4">{renderManagement(risk, index, `${risk.id} ${risk.riskContent}`)}</td>
               </tr>
-              );
-            })}
-            {pageReports.length === 0 && (
-              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center"><p className="font-medium text-app-text-soft">조건에 맞는 보고서가 없습니다.</p><p className="mt-1 text-sm text-app-muted">검색어나 필터를 변경해 주세요.</p></td></tr>
+            ))}
+            {!isLoading && pageReports.length === 0 && (
+              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center"><p className="font-medium text-app-text-soft">{loadError || '조건에 맞는 보고서가 없습니다.'}</p>{!loadError && <p className="mt-1 text-sm text-app-muted">검색어나 필터를 변경해 주세요.</p>}</td></tr>
+            )}
+            {isLoading && activeCategory === 'individual' && (
+              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center text-app-muted">보고서 목록을 불러오는 중입니다.</td></tr>
             )}
           </tbody>
         </table>

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MetricCard from './components/dashboard/MetricCard';
 import RecentAlerts from './components/dashboard/RecentAlerts';
 import RiskDetailCard from './components/dashboard/RiskDetailCard';
@@ -17,6 +18,7 @@ function MapLoadingFallback() {
 
 export default function DashboardPage() {
   const dashboard = dashboardMock;
+  const navigate = useNavigate();
   const [view, setView] = useState('map');
 
   return (
@@ -43,7 +45,11 @@ export default function DashboardPage() {
           </div>
           {view === 'map' ? (
             <Suspense fallback={<MapLoadingFallback />}>
-              <Factory3DView modelUrl={FACTORY_MODEL_URL} riskZones={dashboard.riskZones} />
+              <Factory3DView
+                modelUrl={FACTORY_MODEL_URL}
+                riskZones={dashboard.riskZones}
+                onRiskOpen={risk => navigate(`/risks?riskId=${risk.id}`)}
+              />
             </Suspense>
           ) : (
             <div className="overflow-x-auto px-4 py-5">

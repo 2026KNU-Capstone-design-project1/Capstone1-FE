@@ -41,6 +41,8 @@ const ICONS = {
   home: <><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></>,
   clipboardCheck: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4.5V3h6v1.5M8.5 10l1.5 1.5 2.5-3M8.5 16l1.5 1.5 2.5-3M14.5 10H16M14.5 16H16" /></>,
   uploadCloud: <><path d="M12 16V5m0 0L8 9m4-4 4 4" /><path d="M5 14v5h14v-5" /></>,
+  repeat: <><path d="m17 2 4 4-4 4" /><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4" /><path d="M21 13v2a3 3 0 0 1-3 3H3" /></>,
+  sparkles: <><path d="m12 3 1.15 3.1L16 7.5l-2.85 1.4L12 12l-1.15-3.1L8 7.5l2.85-1.4L12 3Z" /><path d="m18.5 13 .75 2.05L21 16l-1.75.95L18.5 19l-.75-2.05L16 16l1.75-.95L18.5 13ZM5.5 12l.7 1.8L8 14.5l-1.8.7L5.5 17l-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" /></>,
 };
 
 export default function AppIcon({ name, className = '', strokeWidth = 1.7 }) {

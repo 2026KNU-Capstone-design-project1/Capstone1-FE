@@ -1,14 +1,13 @@
-import AppIcon from '../../../components/AppIcon';
 import PasswordField, { signupInputClass, signupLabelClass } from './PasswordField';
 import useSignupForm from './useSignupForm';
 
 const roles = [
   { value: 'ADMIN', label: '관리자' },
-  { value: 'SITE_MANAGER', label: '현장 담당자' },
+  { value: 'SITE_MANAGER', label: '작업자' },
 ];
 
-export default function SignupForm({ onCheckLoginId, onSignup, sites }) {
-  const signup = useSignupForm({ onCheckLoginId, onSignup });
+export default function SignupForm({ onCheckLoginId, onSignup, onSuccess }) {
+  const signup = useSignupForm({ onCheckLoginId, onSignup, onSuccess });
   const { form, idCheck, isCheckingId, isSiteManager, isSubmitting } = signup;
   const passwordMismatch = form.confirmPassword && form.password !== form.confirmPassword
     ? '비밀번호가 일치하지 않습니다.'
@@ -143,32 +142,17 @@ export default function SignupForm({ onCheckLoginId, onSignup, sites }) {
       {isSiteManager && (
         <div>
           <label className={signupLabelClass} htmlFor="signup-site">담당 현장</label>
-          <div className="relative">
-            <AppIcon
-              name="search"
-              className="pointer-events-none absolute top-1/2 left-4 h-[19px] w-[19px] -translate-y-1/2 text-auth-muted"
-            />
-            <select
-              id="signup-site"
-              className={`${signupInputClass} appearance-none pr-11 pl-12 ${form.siteId ? '' : 'text-auth-placeholder'}`}
-              value={form.siteId}
-              onChange={event => signup.updateField('siteId', event.target.value)}
-              required
-              disabled={isSubmitting}
-            >
-              <option value="" className="bg-auth-input-solid">담당 현장을 선택하세요</option>
-              {sites.map(site => (
-                <option key={site.id} value={site.id} className="bg-auth-input-solid text-app-text">
-                  {site.name}
-                </option>
-              ))}
-            </select>
-            <AppIcon
-              name="chevronDown"
-              className="pointer-events-none absolute top-1/2 right-4 h-4 w-4 -translate-y-1/2 text-auth-muted"
-            />
-          </div>
-          <p className="mt-1 text-[12px] text-auth-muted">소속된 현장을 선택해 주세요.</p>
+          <input
+            id="signup-site"
+            className={signupInputClass}
+            type="text"
+            placeholder="현장 이름을 입력하세요"
+            value={form.siteName}
+            onChange={event => signup.updateField('siteName', event.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+          <p className="mt-1 text-[12px] text-auth-muted">소속된 현장 이름을 입력해 주세요.</p>
         </div>
       )}
 

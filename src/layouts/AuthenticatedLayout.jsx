@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { logout } from '../api/auth';
+import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { getAccessToken, getUserRole, isWorkerRole, logout } from '../api/auth';
 import AppHeader from '../components/layout/AppHeader';
 import Sidebar from '../components/layout/Sidebar';
 
@@ -11,6 +11,10 @@ export default function AuthenticatedLayout() {
   function handleLogout() {
     logout();
     navigate('/login', { replace: true });
+  }
+
+  if (getAccessToken() && isWorkerRole(getUserRole())) {
+    return <Navigate to="/worker" replace />;
   }
 
   return (

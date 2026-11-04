@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 const initialForm = {
   name: '', loginId: '', password: '', confirmPassword: '',
-  email: '', phone: '', role: 'ADMIN', siteId: '',
+  email: '', phone: '', role: 'ADMIN', siteName: '',
 };
 
 function formatPhone(value) {
@@ -13,7 +13,7 @@ function formatPhone(value) {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
 }
 
-export default function useSignupForm({ onCheckLoginId, onSignup }) {
+export default function useSignupForm({ onCheckLoginId, onSignup, onSuccess }) {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingId, setIsCheckingId] = useState(false);
@@ -28,7 +28,7 @@ export default function useSignupForm({ onCheckLoginId, onSignup }) {
   }
 
   function changeRole(role) {
-    setForm(previous => ({ ...previous, role, siteId: role === 'ADMIN' ? '' : previous.siteId }));
+    setForm(previous => ({ ...previous, role, siteName: role === 'ADMIN' ? '' : previous.siteName }));
     setMessage('');
   }
 
@@ -65,16 +65,16 @@ export default function useSignupForm({ onCheckLoginId, onSignup }) {
     setMessage('');
     if (form.password !== form.confirmPassword) return setMessage('비밀번호가 일치하지 않습니다.');
     if (idCheck.loginId !== form.loginId.trim() || !idCheck.available) return setMessage('사용 가능한 아이디인지 중복 확인해 주세요.');
-    if (isSiteManager && !form.siteId) return setMessage('담당 현장을 선택해 주세요.');
+    if (isSiteManager && !form.siteName.trim()) return setMessage('담당 현장 이름을 입력해 주세요.');
 
     setIsSubmitting(true);
     try {
       await onSignup({
         name: form.name.trim(), loginId: form.loginId.trim(), password: form.password,
         email: form.email.trim(), phone: form.phone.replace(/\D/g, ''),
-        role: form.role, siteId: isSiteManager ? form.siteId : null,
+        role: form.role, siteName: isSiteManager ? form.siteName.trim() : null,
       });
-      setMessage('회원가입이 완료되었습니다. 로그인해 주세요.');
+      onSuccess?.();
     } catch (error) {
       setMessage(error?.status === 409 ? '이미 사용 중인 아이디입니다.' : '회원가입에 실패했습니다. 입력 정보를 확인해 주세요.');
     } finally {

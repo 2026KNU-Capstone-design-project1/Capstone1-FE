@@ -13,11 +13,7 @@ export default function AuthLayout({ ariaLabel, children }) {
             <span className="block">더 안전한 산업현장을 위한</span>
             <span className="block text-app-accent">스마트 안전관리 시스템</span>
           </h1>
-          <p className="mt-5 leading-[1.55] tracking-[-.4px] text-auth-muted">
-            AI 기반 위험 탐지부터 현장 모니터링까지,
-            <br />
-            하나의 플랫폼에서 관리하세요.
-          </p>
+          
         </div>
         <FactoryIllustration />
       </section>

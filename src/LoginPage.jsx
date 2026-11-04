@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AppIcon from './components/AppIcon';
 import AuthLayout from './layouts/AuthLayout';
+import { getRoleHomePath } from './api/auth';
 
 const SAVED_ID_KEY = 'virnect.savedLoginId';
 
@@ -10,8 +11,9 @@ function readSavedId() {
   catch { return ''; }
 }
 
-export default function LoginPage({ onLogin, signupHref = '/signup', forgotPasswordHref = '/forgot-password', successHref = '/dashboard' }) {
+export default function LoginPage({ onLogin, signupHref = '/signup', forgotPasswordHref = '/forgot-password', successHref }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [savedId] = useState(readSavedId);
   const [loginId, setLoginId] = useState(savedId);
   const [password, setPassword] = useState('');
@@ -19,6 +21,18 @@ export default function LoginPage({ onLogin, signupHref = '/signup', forgotPassw
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [showSignupComplete, setShowSignupComplete] = useState(Boolean(location.state?.signupComplete));
+
+  useEffect(() => {
+    if (!location.state?.signupComplete) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (!showSignupComplete) return undefined;
+    const timeoutId = window.setTimeout(() => setShowSignupComplete(false), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [showSignupComplete]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -34,12 +48,12 @@ export default function LoginPage({ onLogin, signupHref = '/signup', forgotPassw
     }
     setIsSubmitting(true);
     try {
-      await onLogin({ loginId: normalizedId, password });
+      const auth = await onLogin({ loginId: normalizedId, password });
       try {
         if (rememberId) localStorage.setItem(SAVED_ID_KEY, normalizedId);
         else localStorage.removeItem(SAVED_ID_KEY);
       } catch {}
-      navigate(successHref, { replace: true });
+      navigate(successHref || getRoleHomePath(auth?.role), { replace: true });
     } catch (error) {
       setMessage(error?.status === 401 ? '아이디 또는 비밀번호가 올바르지 않습니다.' : '로그인에 실패했습니다. 네트워크 연결을 확인해 주세요.');
     } finally {
@@ -56,9 +70,17 @@ export default function LoginPage({ onLogin, signupHref = '/signup', forgotPassw
 
   return (
     <AuthLayout ariaLabel="로그인">
+      {showSignupComplete && (
+        <div
+          className="pointer-events-none fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-auth-success/40 bg-app-panel px-5 py-3 text-sm font-semibold text-auth-success shadow-xl"
+          role="status"
+        >
+          회원가입이 완료되었습니다.
+        </div>
+      )}
+
       <header>
         <h2 className="text-[38px] leading-tight font-bold tracking-[-1px] sm:text-[42px]">로그인</h2>
-        <p className="mt-2 text-[16px] leading-relaxed text-auth-muted sm:text-[19px]">VIRNECT Industrial Safety에 로그인하세요.</p>
       </header>
 
       <form className="mt-9" onSubmit={handleSubmit}>

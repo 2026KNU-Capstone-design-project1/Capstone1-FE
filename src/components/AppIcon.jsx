@@ -38,6 +38,9 @@ const ICONS = {
   download: <><path d="M12 3v12m0 0 5-5m-5 5-5-5" /><path d="M5 17v3h14v-3" /></>,
   copy: <><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></>,
   trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></>,
+  home: <><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></>,
+  clipboardCheck: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4.5V3h6v1.5M8.5 10l1.5 1.5 2.5-3M8.5 16l1.5 1.5 2.5-3M14.5 10H16M14.5 16H16" /></>,
+  uploadCloud: <><path d="M12 16V5m0 0L8 9m4-4 4 4" /><path d="M5 14v5h14v-5" /></>,
 };
 
 export default function AppIcon({ name, className = '', strokeWidth = 1.7 }) {

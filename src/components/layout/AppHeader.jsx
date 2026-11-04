@@ -31,7 +31,7 @@ export default function AppHeader({ title, onOpenSidebar, onLogout }) {
   }
 
   return (
-    <header className="flex h-[77px] items-center justify-between gap-4 border-b border-app-border-soft px-5 lg:px-[21px]">
+    <header className="sticky top-0 z-30 flex h-[77px] items-center justify-between gap-4 border-b border-app-border-soft bg-app-background px-5 lg:px-[21px]">
       <div className="flex min-w-0 items-center gap-3">
         <button className="shrink-0 rounded-md p-1 text-app-text lg:hidden" type="button" onClick={onOpenSidebar} aria-label="사이드바 열기"><AppIcon name="menu" className="h-6 w-6" /></button>
         <h1 className="truncate text-[24px] font-bold tracking-[-.4px] text-app-text sm:text-[26px]">{title}</h1>

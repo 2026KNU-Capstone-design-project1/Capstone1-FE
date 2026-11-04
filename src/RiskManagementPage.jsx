@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getRisks } from './api/risks';
 import AppIcon from './components/AppIcon';
 import RiskDetailModal from './components/risks/RiskDetailModal';
@@ -35,6 +36,7 @@ function FilterSelect({ label, value, onChange, children, className = '' }) {
 }
 
 export default function RiskManagementPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [area, setArea] = useState('all');
   const [severity, setSeverity] = useState('all');
@@ -42,11 +44,11 @@ export default function RiskManagementPage() {
   const [period, setPeriod] = useState('all');
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
-  const [selectedRisk, setSelectedRisk] = useState(null);
   const [riskItems, setRiskItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadedAt, setLoadedAt] = useState(0);
+  const requestedRiskId = searchParams.get('riskId');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -70,6 +72,26 @@ export default function RiskManagementPage() {
     loadRisks();
     return () => controller.abort();
   }, []);
+
+  const selectedRisk = useMemo(() => {
+    if (!requestedRiskId) return null;
+    return riskItems.find(risk => (
+      String(risk.id) === requestedRiskId || risk.displayCode === requestedRiskId
+    )) ?? null;
+  }, [requestedRiskId, riskItems]);
+
+  function openRisk(risk) {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('riskId', String(risk.id));
+    setSearchParams(nextParams);
+  }
+
+  function closeRisk() {
+    if (!searchParams.has('riskId')) return;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('riskId');
+    setSearchParams(nextParams, { replace: true });
+  }
 
   function update(setter) {
     return event => {
@@ -134,6 +156,7 @@ export default function RiskManagementPage() {
           <option value="A구역">A구역</option>
           <option value="B구역">B구역</option>
           <option value="C구역">C구역</option>
+          <option value="D구역">D구역</option>
         </FilterSelect>
         <FilterSelect label="위험 등급" value={severity} onChange={update(setSeverity)}>
           <option value="all">위험 등급</option>
@@ -201,11 +224,11 @@ export default function RiskManagementPage() {
                 tabIndex="0"
                 role="button"
                 aria-label={`${risk.displayCode} ${risk.content} 상세 보기`}
-                onClick={() => setSelectedRisk(risk)}
+                onClick={() => openRisk(risk)}
                 onKeyDown={event => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    setSelectedRisk(risk);
+                    openRisk(risk);
                   }
                 }}
               >
@@ -245,7 +268,7 @@ export default function RiskManagementPage() {
         </nav>
       </div>
 
-      {selectedRisk && <RiskDetailModal risk={selectedRisk} onClose={() => setSelectedRisk(null)} />}
+      {selectedRisk && <RiskDetailModal risk={selectedRisk} onClose={closeRisk} />}
     </section>
   );
 }

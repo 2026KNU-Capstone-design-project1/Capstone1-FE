@@ -8,6 +8,7 @@ import RiskManagementPage from './RiskManagementPage';
 import VideoManagementPage from './VideoManagementPage';
 import VideoFolderPage from './VideoFolderPage';
 import ReportsPage from './ReportsPage';
+import RiskHistoryPage from './RiskHistoryPage';
 import PlaceholderPage from './PlaceholderPage';
 import AuthenticatedLayout from './layouts/AuthenticatedLayout';
 import { checkLoginId, login, signup } from './api/auth';
@@ -49,7 +50,7 @@ export default function App() {
           <Route path="/risks" element={<RiskManagementPage />} />
           <Route path="/videos" element={<VideoManagementPage />} />
           <Route path="/videos/:date" element={<VideoFolderPage />} />
-          <Route path="/history" element={<PlaceholderPage title="위험 이력" />} />
+          <Route path="/history" element={<RiskHistoryPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/reports/individual/:reportId" element={<Suspense fallback={<div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">개별 PDF 보고서를 불러오고 있습니다…</div>}><IndividualReportDetailPage /></Suspense>} />
           <Route path="/reports/:reportId" element={<Suspense fallback={<div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">PDF 보고서를 불러오고 있습니다…</div>}><ReportDetailPage /></Suspense>} />

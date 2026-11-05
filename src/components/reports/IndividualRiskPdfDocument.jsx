@@ -71,6 +71,14 @@ function bboxRatio(data) {
 }
 
 function BboxHeroImage({ data }) {
+  if (!data.imageUrl) {
+    return (
+      <View style={{ position: 'absolute', ...IMAGE_BOX, alignItems: 'center', justifyContent: 'center', backgroundColor: '#e8edf1' }}>
+        <Text style={{ fontSize: 11, color: '#66798a' }}>이미지 정보 없음</Text>
+      </View>
+    );
+  }
+
   const sourceWidth = data.imageWidth || 1;
   const sourceHeight = data.imageHeight || 1;
   const scale = Math.max(IMAGE_BOX.width / sourceWidth, IMAGE_BOX.height / sourceHeight);

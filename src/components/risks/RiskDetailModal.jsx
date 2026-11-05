@@ -33,13 +33,28 @@ function makeFallbackHistory(risk) {
   if (risk.resolvedAt) {
     history.push({
       detectedAt: risk.resolvedAt,
-      description: `처리 완료${risk.assignee !== '미배정' ? ` · ${risk.assignee}` : ''}`,
+      description: `해결 완료${risk.assignee !== '미배정' ? ` · ${risk.assignee}` : ''}`,
     });
   }
   return history;
 }
 
-export default function RiskDetailModal({ risk, onClose }) {
+function getBoundingBoxStyle(bbox) {
+  if (!bbox) return null;
+
+  const values = [bbox.x, bbox.y, bbox.width, bbox.height].map(Number);
+  if (values.some(value => !Number.isFinite(value) || value < 0 || value > 1)) return null;
+
+  const [x, y, width, height] = values;
+  return {
+    left: `${x * 100}%`,
+    top: `${y * 100}%`,
+    width: `${width * 100}%`,
+    height: `${height * 100}%`,
+  };
+}
+
+export default function RiskDetailModal({ risk, detailError = '', onClose }) {
   const closeButtonRef = useRef(null);
   const statusControlRef = useRef(null);
   const [currentStatus, setCurrentStatus] = useState(risk.status);
@@ -49,6 +64,12 @@ export default function RiskDetailModal({ risk, onClose }) {
     () => risk.history?.length ? risk.history : makeFallbackHistory(risk),
     [risk],
   );
+  const originalVideoUrl = risk.relatedVideos?.[0]?.videoUrl;
+  const relatedVideoCount = risk.relatedVideos?.length ?? 0;
+  const boundingBoxStyle = getBoundingBoxStyle(risk.bbox);
+  const detailedLocation = [risk.zoneName, risk.facilityName, risk.locationDescription]
+    .filter(Boolean)
+    .join(' · ') || risk.location;
 
   useEffect(() => {
     const previouslyFocused = document.activeElement;
@@ -111,6 +132,11 @@ export default function RiskDetailModal({ risk, onClose }) {
         </header>
 
         <div className="min-h-0 overflow-y-auto px-7 pt-5 pb-5 [scrollbar-color:#375365_transparent]">
+          {detailError && (
+            <div className="mb-4 rounded-lg border border-app-danger/50 bg-app-danger/10 px-4 py-3 text-[14px] text-app-danger" role="alert">
+              상세 API 연결 실패: {detailError}
+            </div>
+          )}
           <h3 className="text-[24px] font-bold tracking-[-.4px]">{risk.content}</h3>
 
           <div className="mt-3 flex flex-wrap items-center gap-y-2 text-[15px]">
@@ -119,21 +145,36 @@ export default function RiskDetailModal({ risk, onClose }) {
             <p className="border-l border-app-border pl-7 text-app-muted">처리 상태: <strong className={`ml-3 font-bold ${statusTone[currentStatus]}`}>{currentStatus}</strong></p>
           </div>
 
-          <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1.65fr)_minmax(250px,1fr)]">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(250px,1fr)]">
             <div className="min-w-0">
-              <img className="h-[288px] w-full rounded-lg border border-app-border object-cover" src={risk.image ?? riskDetailImage} alt={`${risk.content} 감지 화면`} />
-              <button className="mt-3 flex h-10 min-w-[172px] items-center justify-center gap-3 rounded-lg border border-[#698797] px-5 text-[14px] font-medium text-app-text transition-colors hover:bg-app-hover" type="button">
+              <div className="relative h-[288px] w-full overflow-hidden rounded-lg border border-app-border">
+                <img className="h-full w-full object-cover" src={risk.image ?? riskDetailImage} alt={`${risk.content} 감지 화면`} />
+                {boundingBoxStyle && (
+                  <span
+                    className="pointer-events-none absolute border-[3px] border-[#ff3838] shadow-[0_0_0_1px_rgba(0,0,0,.45),0_0_12px_rgba(255,56,56,.55)]"
+                    style={boundingBoxStyle}
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+              <a
+                className={`mt-3 flex h-10 w-fit min-w-[172px] items-center justify-center gap-3 rounded-lg border border-[#698797] px-5 text-[14px] font-medium text-app-text transition-colors ${originalVideoUrl ? 'hover:bg-app-hover' : 'pointer-events-none opacity-45'}`}
+                href={originalVideoUrl || undefined}
+                target="_blank"
+                rel="noreferrer"
+                aria-disabled={!originalVideoUrl}
+              >
                 <AppIcon name="play" className="h-5 w-5" />
                 원본 영상 보기
-              </button>
+              </a>
             </div>
 
-            <dl className="grid content-start grid-cols-[78px_minmax(0,1fr)] gap-x-4 gap-y-5 pt-1 text-[15px]">
-              <dt className="text-app-muted">현장:</dt><dd className="break-words text-app-text">{risk.site ?? dashboardMock.site.name}</dd>
-              <dt className="text-app-muted">위치:</dt><dd>{risk.location}</dd>
+            <dl className="grid content-start grid-cols-[60px_minmax(0,1fr)] gap-x-4 gap-y-5 pt-1 text-[15px]">
+              <dt className="text-app-muted">현장:</dt><dd className="break-words text-app-text">{risk.siteName ?? risk.site ?? dashboardMock.site.name}</dd>
+              <dt className="text-app-muted">위치:</dt><dd>{detailedLocation}</dd>
               <dt className="text-app-muted">발견일시:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.detectedAt)}</dd>
               <dt className="text-app-muted">해결일시:</dt><dd className="whitespace-nowrap">{formatDateTime(risk.resolvedAt)}</dd>
-              <dt className="text-app-muted">관련 영상:</dt><dd>{risk.videos}개</dd>
+              <dt className="text-app-muted">관련 영상:</dt><dd>{relatedVideoCount}개</dd>
               <dt className="text-app-muted">담당자:</dt><dd>{risk.assignee}</dd>
             </dl>
           </div>

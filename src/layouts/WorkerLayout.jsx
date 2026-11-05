@@ -13,11 +13,11 @@ const workerNavigation = [
 
 function WorkerLogo() {
   return (
-    <div className="flex items-center gap-2.5" aria-label="VIRNECT">
-      <svg className="h-9 w-9 text-app-accent" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
+    <div className="flex items-center gap-[11px]" aria-label="VIRNECT">
+      <svg className="h-8 w-8 text-app-accent" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
         <path d="M8 1h32l-6 9H14ZM1 11h13l10 19 10-19h13L29 47H19Z" />
       </svg>
-      <span className="text-[27px] font-black tracking-[-1.2px] text-[#101c25]">VIRNECT</span>
+      <span className="text-[24px] leading-none font-black tracking-[-1.1px] text-[#101c25]">VIRNECT</span>
     </div>
   );
 }
@@ -66,8 +66,8 @@ export default function WorkerLayout() {
 
   return (
     <div className="min-h-[100dvh] bg-[#dfe5e9] text-[#14232e]">
-      <div className="worker-app relative mx-auto min-h-[100dvh] w-[100vw] max-w-[480px] overflow-x-hidden bg-[#f4f7f9]">
-        <header className="sticky top-6 z-30 flex h-[88px] items-end justify-between bg-[#f4f7f9]/95 px-8 pb-4 backdrop-blur-lg supports-[padding-top:env(safe-area-inset-top)]:h-[calc(72px+env(safe-area-inset-top))]">
+      <div className="worker-app relative mx-auto min-h-[100dvh] w-full max-w-[430px] overflow-x-hidden bg-[#f6f8fa]">
+        <header className="sticky top-0 z-30 flex h-[calc(110px+env(safe-area-inset-top))] items-end justify-between bg-[#f6f8fa]/95 pr-[27px] pl-[30px] pt-[env(safe-area-inset-top)] pb-4 backdrop-blur-lg">
           <WorkerLogo />
           <div ref={menuRef} className="relative">
             <button
@@ -88,11 +88,11 @@ export default function WorkerLayout() {
           </div>
         </header>
 
-        <main className="min-w-0 px-8 pt-10 pb-[calc(116px+env(safe-area-inset-bottom))]">
+        <main className="min-w-0 px-[25px] pt-[26px] pb-[calc(125px+env(safe-area-inset-bottom))]">
           <Outlet />
         </main>
 
-        <nav className="fixed right-0 bottom-0 left-0 z-30 mx-auto grid h-[86px] w-[100vw] max-w-[480px] grid-cols-4 border-t border-[#e5eaed] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl" aria-label="작업자 메뉴">
+        <nav className="fixed right-0 bottom-0 left-0 z-30 mx-auto grid h-[100px] w-full max-w-[430px] grid-cols-4 border-t border-[#e0e5e8] bg-white/95 px-2 pb-[max(28px,env(safe-area-inset-bottom))] backdrop-blur-xl" aria-label="작업자 메뉴">
           {workerNavigation.map(item => {
             const selected = item.end
               ? location.pathname === item.to
@@ -102,9 +102,9 @@ export default function WorkerLayout() {
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                className={`flex flex-col items-center justify-center gap-1 text-[12px] font-bold transition-colors ${selected ? 'text-app-accent' : 'text-[#59636c]'}`}
+                className={`flex flex-col items-center justify-center gap-[5px] pt-1 text-[12px] leading-none font-bold transition-colors ${selected ? 'text-app-accent' : 'text-[#59636c]'}`}
               >
-                <AppIcon name={item.icon} className="h-[27px] w-[27px]" strokeWidth={selected ? 2.2 : 1.8} />
+                <AppIcon name={item.icon} className="h-[28px] w-[28px]" strokeWidth={selected ? 2.2 : 1.8} />
                 <span>{item.label}</span>
               </NavLink>
             );

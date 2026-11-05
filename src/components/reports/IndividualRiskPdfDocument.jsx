@@ -4,7 +4,7 @@ import notoSansKrRegular from '../../assets/fonts/NotoSansKR-Regular.ttf';
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
-const IMAGE_BOX = { left: 25, top: 147, width: 545, height: 327 };
+const IMAGE_BOX = { left: 25, top: 157, width: 545, height: 327 };
 const COLORS = {
   navy: '#0b2745',
   orange: '#ff6b1a',
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   infoRow: { height: 22, flexDirection: 'row', borderRightWidth: 0.7, borderBottomWidth: 0.7, borderColor: COLORS.border },
   infoLabel: { width: 76, paddingLeft: 9, justifyContent: 'center', backgroundColor: COLORS.label, borderRightWidth: 0.7, borderRightColor: COLORS.border },
   infoValue: { flex: 1, paddingLeft: 10, justifyContent: 'center' },
-  detailTable: { position: 'absolute', top: 566, left: 25, width: 545, borderTopWidth: 0.7, borderLeftWidth: 0.7, borderColor: COLORS.border },
+  detailTable: { position: 'absolute', top: 550, left: 25, width: 545, borderTopWidth: 0.7, borderLeftWidth: 0.7, borderColor: COLORS.border },
   tableRow: { flexDirection: 'row', borderRightWidth: 0.7, borderBottomWidth: 0.7, borderColor: COLORS.border },
   tableLabel: { width: 98, paddingLeft: 10, justifyContent: 'center', backgroundColor: COLORS.label, borderRightWidth: 0.7, borderRightColor: COLORS.border },
   tableValue: {
@@ -182,11 +182,9 @@ export function IndividualRiskPdfDocument({ data }) {
 
         <BboxHeroImage data={data} />
 
-        <View style={{ position: 'absolute', top: 480, left: 25, width: 545, height: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 0.8, borderColor: '#4d5660', backgroundColor: '#ffe813' }}>
-          <Text style={{ fontSize: 10.5, fontWeight: 700, color: '#111111' }}>경고: {data.warning}</Text>
-        </View>
 
-        <View style={{ position: 'absolute', top: 535, left: 26, flexDirection: 'row', alignItems: 'center' }}>
+
+        <View style={{ position: 'absolute', top: 510, left: 26, flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ width: 6, height: 21, marginRight: 10, backgroundColor: COLORS.orange }} />
           <Text style={{ fontSize: 16, fontWeight: 700 }}>상세 정보</Text>
         </View>

@@ -65,7 +65,7 @@ function FolderCard({ folder, onOpen }) {
 
   return (
     <article
-      className="group flex min-h-[190px] cursor-pointer flex-col rounded-xl border border-app-border bg-[#071c28] px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-[#09212e] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
+      className="group flex min-h-[170px] cursor-pointer flex-col rounded-xl border border-app-border bg-[#071c28] px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-[#09212e] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
       role="link"
       tabIndex="0"
       aria-label={`${folder.date} 영상 폴더 열기`}
@@ -81,7 +81,7 @@ function FolderCard({ folder, onOpen }) {
         <FolderIcon className="h-[34px] w-[34px] shrink-0" />
         <div className="min-w-0 flex-1 pt-0.5">
           <h4 className="text-[17px] font-bold tracking-[-.15px] text-app-text">{folder.date.replaceAll('-', '.')}</h4>
-          <p className="mt-[4px] mb-[10px] text-[14px] text-app-text-soft">
+          <p className="mt-[4px] mb-[15px] text-[14px] text-app-text-soft">
             영상 {folder.videoCount}개 <span className="mx-1 text-app-muted">·</span> 분석 완료 {folder.analyzedCount}/{folder.videoCount}
           </p>
         </div>
@@ -107,12 +107,7 @@ function FolderCard({ folder, onOpen }) {
             </p>
           </div>
         </div>
-        {folder.analysisFailedCount > 0 && (
-          <div className="mt-2 flex h-[27px] items-center gap-2 rounded-lg bg-[#30212d] px-2.5 text-[12px] text-app-danger">
-            <FailureIcon className="h-[17px] w-[17px] shrink-0" />
-            <span>분석 실패 {folder.analysisFailedCount}개</span>
-          </div>
-        )}
+        
       </div>
     </article>
   );

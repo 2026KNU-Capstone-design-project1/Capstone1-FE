@@ -11,19 +11,17 @@ export default function WorkerRiskCard({ risk, priority = false }) {
   return (
     <Link
       to={`/worker/actions/${risk.id}`}
-      className={`group flex min-h-[86px] items-center gap-3 rounded-[22px] px-5 py-4 transition-transform active:scale-[.985] ${priority ? 'bg-[#fff3ee]' : 'bg-white'}`}
+      className={`group flex items-center gap-3 rounded-[19px] border border-[#e1e6e9] bg-white pr-[21px] shadow-[0_5px_16px_rgba(35,54,68,0.025)] transition-transform active:scale-[.985] ${priority ? 'h-[84px] pl-[29px]' : 'h-[80px] pl-[21px]'}`}
       aria-label={`${risk.title}, ${risk.severity}, ${risk.status}`}
     >
-      {priority && <span className="h-12 w-1.5 shrink-0 rounded-full bg-app-accent" aria-hidden="true" />}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[18px] font-extrabold tracking-[-.5px] text-[#14232e]">{risk.title}</span>
-        <span className="mt-1 block truncate text-[14px] text-[#697680]">{risk.location}</span>
+        <span className="block truncate text-[19px] leading-6 font-extrabold tracking-[-.6px] text-[#14232e]">{risk.title}</span>
+        <span className="mt-[3px] block truncate text-[15px] leading-5 text-[#697680]">{risk.location}</span>
       </span>
-      <span className={`shrink-0 rounded-xl px-3 py-2 text-[12px] font-extrabold ${severityStyles[risk.severity] || severityStyles.LOW}`}>
+      <span className={`min-w-[58px] shrink-0 rounded-[15px] px-[11px] py-[7px] text-center text-[12px] leading-4 font-extrabold ${severityStyles[risk.severity] || severityStyles.LOW}`}>
         {risk.severity}
       </span>
-      {!priority && <span className="hidden shrink-0 text-[13px] text-[#5f6871] min-[370px]:inline">{risk.status}</span>}
-      <AppIcon name="chevronRight" className="h-5 w-5 shrink-0 text-[#65717a] transition-transform group-hover:translate-x-0.5" strokeWidth={2.1} />
+      <AppIcon name="chevronRight" className="h-5 w-5 shrink-0 text-[#65717a] transition-transform group-hover:translate-x-0.5" strokeWidth={2.2} />
     </Link>
   );
 }

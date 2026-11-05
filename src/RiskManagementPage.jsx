@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getRisks } from './api/risks';
+import { getRisk, getRisks } from './api/risks';
 import AppIcon from './components/AppIcon';
 import RiskDetailModal from './components/risks/RiskDetailModal';
 import { formatDateTime, toTimestamp } from './utils/dateTime';
@@ -48,6 +48,8 @@ export default function RiskManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadedAt, setLoadedAt] = useState(0);
+  const [riskDetail, setRiskDetail] = useState(null);
+  const [riskDetailError, setRiskDetailError] = useState('');
   const requestedRiskId = searchParams.get('riskId');
 
   useEffect(() => {
@@ -75,12 +77,42 @@ export default function RiskManagementPage() {
 
   const selectedRisk = useMemo(() => {
     if (!requestedRiskId) return null;
+    if (riskDetail && (
+      String(riskDetail.id) === requestedRiskId || riskDetail.displayCode === requestedRiskId
+    )) return riskDetail;
+
     return riskItems.find(risk => (
       String(risk.id) === requestedRiskId || risk.displayCode === requestedRiskId
     )) ?? null;
-  }, [requestedRiskId, riskItems]);
+  }, [requestedRiskId, riskDetail, riskItems]);
+
+  useEffect(() => {
+    if (!requestedRiskId) return undefined;
+
+    const controller = new AbortController();
+    const riskId = requestedRiskId.replace(/^RISK-/i, '');
+
+    async function loadRiskDetail() {
+      try {
+        setRiskDetailError('');
+        setRiskDetail(await getRisk(riskId, { signal: controller.signal }));
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setRiskDetail(null);
+          const statusText = requestError.status ? ` (HTTP ${requestError.status})` : '';
+          setRiskDetailError(`${requestError.message || '위험 상세 정보를 불러오지 못했습니다.'}${statusText}`);
+          console.error('위험 상세 조회 실패:', requestError);
+        }
+      }
+    }
+
+    loadRiskDetail();
+    return () => controller.abort();
+  }, [requestedRiskId]);
 
   function openRisk(risk) {
+    setRiskDetail(null);
+    setRiskDetailError('');
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set('riskId', String(risk.id));
     setSearchParams(nextParams);
@@ -88,6 +120,8 @@ export default function RiskManagementPage() {
 
   function closeRisk() {
     if (!searchParams.has('riskId')) return;
+    setRiskDetail(null);
+    setRiskDetailError('');
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete('riskId');
     setSearchParams(nextParams, { replace: true });
@@ -268,7 +302,14 @@ export default function RiskManagementPage() {
         </nav>
       </div>
 
-      {selectedRisk && <RiskDetailModal risk={selectedRisk} onClose={closeRisk} />}
+      {selectedRisk && (
+        <RiskDetailModal
+          key={`${selectedRisk.id}-${selectedRisk.status}`}
+          risk={selectedRisk}
+          detailError={riskDetailError}
+          onClose={closeRisk}
+        />
+      )}
     </section>
   );
 }

@@ -88,7 +88,7 @@ export default function WorkerLayout() {
           </div>
         </header>
 
-        <main className="min-w-0 px-11 pt-10 pb-[calc(116px+env(safe-area-inset-bottom))]">
+        <main className="min-w-0 px-10 pt-10 pb-[calc(116px+env(safe-area-inset-bottom))]">
           <Outlet />
         </main>
 

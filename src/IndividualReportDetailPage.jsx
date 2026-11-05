@@ -5,6 +5,7 @@ import AppIcon from './components/AppIcon';
 import { IndividualRiskPdfDocument } from './components/reports/IndividualRiskPdfDocument';
 import PdfPreviewWorkspace from './components/reports/PdfPreviewWorkspace';
 import { buildIndividualRiskPdfData, individualRiskPdfFileName } from './data/individualReportPdfData';
+import { loadPdfImage } from './utils/image';
 
 export default function IndividualReportDetailPage() {
   const { reportId } = useParams();
@@ -21,9 +22,23 @@ export default function IndividualReportDetailPage() {
     async function loadReport() {
       setIsLoading(true);
       setError('');
+      setRisk(null);
 
       try {
-        setRisk(await getIndividualReport(reportId, { signal: controller.signal }));
+        const report = await getIndividualReport(reportId, { signal: controller.signal });
+        let preparedReport = report;
+
+        if (report.imageUrl) {
+          const image = await loadPdfImage(report.imageUrl, { signal: controller.signal });
+          preparedReport = {
+            ...report,
+            imageUrl: image.dataUrl,
+            imageWidth: image.width,
+            imageHeight: image.height,
+          };
+        }
+
+        if (!controller.signal.aborted) setRisk(preparedReport);
       } catch (requestError) {
         if (requestError.name !== 'AbortError') {
           setError(requestError.message || '개별 보고서를 불러오지 못했습니다.');

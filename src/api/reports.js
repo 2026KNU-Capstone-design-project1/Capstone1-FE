@@ -18,35 +18,34 @@ function reportCreatedAt(report) {
   return report.createdAt ?? report.created_at;
 }
 
-function getImageDimensions(imageUrl, signal) {
-  if (!imageUrl || typeof Image === 'undefined' || signal?.aborted) {
-    return Promise.resolve(null);
+function storageObjectKey(imageUrl) {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith('risk-thumbnails/')) return imageUrl;
+
+  try {
+    const url = new URL(imageUrl);
+    if (!url.hostname.includes('.s3.')) return null;
+    return decodeURIComponent(url.pathname.replace(/^\//, ''));
+  } catch {
+    return null;
+  }
+}
+
+async function resolveReportImageUrl(imageUrl, options) {
+  const objectKey = storageObjectKey(imageUrl);
+  if (!objectKey) return imageUrl;
+
+  const download = await getReportList(
+    `/api/storage/download-urls?key=${encodeURIComponent(objectKey)}`,
+    '보고서 이미지 URL',
+    options,
+  );
+
+  if (!download?.downloadUrl) {
+    throw new Error('보고서 이미지 URL 발급 응답이 올바르지 않습니다.');
   }
 
-  return new Promise(resolve => {
-    const image = new Image();
-    const timeoutId = window.setTimeout(() => finish(null), 5000);
-
-    function finish(dimensions) {
-      window.clearTimeout(timeoutId);
-      signal?.removeEventListener('abort', handleAbort);
-      image.onload = null;
-      image.onerror = null;
-      resolve(dimensions);
-    }
-
-    function handleAbort() {
-      finish(null);
-    }
-
-    image.onload = () => finish({
-      imageWidth: image.naturalWidth,
-      imageHeight: image.naturalHeight,
-    });
-    image.onerror = () => finish(null);
-    signal?.addEventListener('abort', handleAbort, { once: true });
-    image.src = imageUrl;
-  });
+  return download.downloadUrl;
 }
 
 function toCollectionReport(report) {
@@ -112,7 +111,7 @@ function toIndividualReportDetail(report) {
 
 export async function getReports(options = {}) {
   const [response, individualResponse] = await Promise.all([
-    getReportList('/api/reports', '통합 보고서 목록', options),
+    getReportList('/api/report', '통합 보고서 목록', options),
     getReportList('/api/reports/individual', '개별 보고서 목록', options),
   ]);
   const reports = Array.isArray(response) ? response : response?.content;
@@ -148,7 +147,7 @@ export async function getIndividualReport(reportId, options = {}) {
   }
 
   const detail = toIndividualReportDetail(report);
-  const dimensions = await getImageDimensions(detail.imageUrl, options.signal);
+  const imageUrl = await resolveReportImageUrl(detail.imageUrl, options);
 
-  return dimensions ? { ...detail, ...dimensions } : detail;
+  return { ...detail, imageUrl };
 }

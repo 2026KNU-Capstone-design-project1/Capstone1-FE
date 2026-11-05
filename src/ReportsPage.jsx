@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getIndividualReport, getReports } from './api/reports';
 import AppIcon from './components/AppIcon';
 import { formatDateTime, toTimestamp } from './utils/dateTime';
+import { loadPdfImage } from './utils/image';
 
 const PAGE_SIZE = 7;
 
@@ -306,7 +307,19 @@ export default function ReportsPage() {
       import('./data/individualReportPdfData'),
       getIndividualReport(risk.reportId),
     ]);
-    const data = buildIndividualRiskPdfData(reportDetail);
+    let preparedReport = reportDetail;
+
+    if (reportDetail.imageUrl) {
+      const image = await loadPdfImage(reportDetail.imageUrl);
+      preparedReport = {
+        ...reportDetail,
+        imageUrl: image.dataUrl,
+        imageWidth: image.width,
+        imageHeight: image.height,
+      };
+    }
+
+    const data = buildIndividualRiskPdfData(preparedReport);
     const blob = await pdf(<IndividualRiskPdfDocument data={data} />).toBlob();
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');

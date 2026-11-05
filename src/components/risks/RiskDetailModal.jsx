@@ -54,9 +54,11 @@ function getBoundingBoxStyle(bbox) {
   };
 }
 
-export default function RiskDetailModal({ risk, detailError = '', onClose }) {
+export default function RiskDetailModal({ risk, detailError = '', isDetailLoading = false, onClose }) {
   const closeButtonRef = useRef(null);
   const statusControlRef = useRef(null);
+  const [loadedImageSource, setLoadedImageSource] = useState('');
+  const [failedImageSource, setFailedImageSource] = useState('');
   const [currentStatus, setCurrentStatus] = useState(risk.status);
   const [pendingStatus, setPendingStatus] = useState(risk.status);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
@@ -67,6 +69,12 @@ export default function RiskDetailModal({ risk, detailError = '', onClose }) {
   const originalVideoUrl = risk.relatedVideos?.[0]?.videoUrl;
   const relatedVideoCount = risk.relatedVideos?.length ?? 0;
   const boundingBoxStyle = getBoundingBoxStyle(risk.bbox);
+  const hasS3Image = Boolean(risk.image);
+  const mockImageAllowed = !isDetailLoading && !detailError && !hasS3Image;
+  const imageSource = hasS3Image ? risk.image : mockImageAllowed ? riskDetailImage : '';
+  const imageLoaded = Boolean(imageSource) && loadedImageSource === imageSource;
+  const imageFailed = Boolean(imageSource) && failedImageSource === imageSource;
+  const showImageLoading = isDetailLoading || (Boolean(imageSource) && !imageLoaded && !imageFailed);
   const detailedLocation = [risk.zoneName, risk.facilityName, risk.locationDescription]
     .filter(Boolean)
     .join(' · ') || risk.location;
@@ -148,8 +156,29 @@ export default function RiskDetailModal({ risk, detailError = '', onClose }) {
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(250px,1fr)]">
             <div className="min-w-0">
               <div className="relative h-[288px] w-full overflow-hidden rounded-lg border border-app-border">
-                <img className="h-full w-full object-cover" src={risk.image ?? riskDetailImage} alt={`${risk.content} 감지 화면`} />
-                {boundingBoxStyle && (
+                {imageSource && (
+                  <img
+                    className={`h-full w-full object-cover transition-opacity ${imageLoaded && !isDetailLoading ? 'opacity-100' : 'opacity-0'}`}
+                    src={imageSource}
+                    alt={`${risk.content} 감지 화면`}
+                    onLoad={() => setLoadedImageSource(imageSource)}
+                    onError={() => setFailedImageSource(imageSource)}
+                  />
+                )}
+                {showImageLoading && (
+                  <div className="absolute inset-0 grid place-items-center bg-[#071b27]" role="status" aria-label="위험 이미지 불러오는 중">
+                    <div className="text-center">
+                      <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-app-border-strong border-t-app-accent" aria-hidden="true" />
+                      <p className="mt-3 text-sm text-app-text-soft">이미지를 불러오는 중입니다.</p>
+                    </div>
+                  </div>
+                )}
+                {!showImageLoading && (detailError || imageFailed) && (
+                  <div className="absolute inset-0 grid place-items-center bg-[#071b27] px-6 text-center text-sm text-app-muted" role="status">
+                    이미지를 불러오지 못했습니다.
+                  </div>
+                )}
+                {!isDetailLoading && hasS3Image && imageLoaded && boundingBoxStyle && (
                   <span
                     className="pointer-events-none absolute border-[3px] border-[#ff3838] shadow-[0_0_0_1px_rgba(0,0,0,.45),0_0_12px_rgba(255,56,56,.55)]"
                     style={boundingBoxStyle}

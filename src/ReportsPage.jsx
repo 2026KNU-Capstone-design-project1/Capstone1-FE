@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getReports } from './api/reports';
+import { getIndividualReport, getReports } from './api/reports';
 import AppIcon from './components/AppIcon';
 import { formatDateTime, toTimestamp } from './utils/dateTime';
 
@@ -136,7 +136,7 @@ export default function ReportsPage() {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [riskReports, setRiskReports] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('individual');
+  const [activeCategory, setActiveCategory] = useState('summary');
   const [typeFilter, setTypeFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [period, setPeriod] = useState('all');
@@ -163,7 +163,9 @@ export default function ReportsPage() {
       setLoadError('');
 
       try {
-        setRiskReports(await getReports({ signal: controller.signal }));
+        const reportItems = await getReports({ signal: controller.signal });
+        setReports(reportItems.filter(report => report.reportType === 'summary'));
+        setRiskReports(reportItems.filter(report => report.reportType === 'individual'));
       } catch (requestError) {
         if (requestError.name !== 'AbortError') {
           setLoadError(requestError.message || '보고서 목록을 불러오지 못했습니다.');
@@ -237,7 +239,10 @@ export default function ReportsPage() {
   const end = Math.min(currentPage * PAGE_SIZE, filteredReports.length);
 
   const riskTypes = useMemo(() => [...new Set(riskReports.map(report => report.riskType).filter(type => type && type !== '-'))].sort((a, b) => a.localeCompare(b, 'ko-KR')), [riskReports]);
-  const periods = useMemo(() => [...new Set(riskReports.map(report => report.createdAt?.slice(0, 7)).filter(Boolean))].sort().reverse(), [riskReports]);
+  const periods = useMemo(() => {
+    const source = activeCategory === 'summary' ? reports : riskReports;
+    return [...new Set(source.map(report => report.createdAt?.slice(0, 7)).filter(Boolean))].sort().reverse();
+  }, [activeCategory, reports, riskReports]);
 
   function createReport(values) {
     const nextNumber = reports.reduce((max, report) => Math.max(max, Number(report.id.replace('REPORT-', '')) || 0), 0) + 1;
@@ -295,17 +300,18 @@ export default function ReportsPage() {
   }
 
   async function downloadIndividualReport(risk) {
-    const [{ pdf }, { IndividualRiskPdfDocument }, { buildIndividualRiskPdfData, individualRiskPdfFileName }] = await Promise.all([
+    const [{ pdf }, { IndividualRiskPdfDocument }, { buildIndividualRiskPdfData, individualRiskPdfFileName }, reportDetail] = await Promise.all([
       import('@react-pdf/renderer'),
       import('./components/reports/IndividualRiskPdfDocument'),
-      import('./data/individualReportPdfMock'),
+      import('./data/individualReportPdfData'),
+      getIndividualReport(risk.reportId),
     ]);
-    const data = buildIndividualRiskPdfData(risk);
+    const data = buildIndividualRiskPdfData(reportDetail);
     const blob = await pdf(<IndividualRiskPdfDocument data={data} />).toBlob();
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = individualRiskPdfFileName(risk);
+    anchor.download = individualRiskPdfFileName(reportDetail);
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -453,7 +459,7 @@ export default function ReportsPage() {
                 <td className="border-r border-app-border-soft px-5"><div className="truncate font-medium text-app-text" title={risk.riskContent}>{risk.riskContent}</div><div className="mt-0.5 text-xs text-app-muted">{risk.id}</div></td>
                 <td className="truncate border-r border-app-border-soft px-5" title={risk.location}>{risk.location}</td>
                 <td className="truncate border-r border-app-border-soft px-5" title={risk.riskType}>{risk.riskType}</td>
-                <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[78px] justify-center rounded-md border px-3 py-1.5 text-[13px] font-bold ${RISK_LEVEL_META[risk.riskLevel]}`}>{risk.riskLevel}</span></td>
+                <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[78px] justify-center rounded-md border px-3 py-1.5 text-[13px] font-bold ${RISK_LEVEL_META[risk.riskLevel] ?? 'border-app-border text-app-text-soft'}`}>{risk.riskLevel}</span></td>
                 <td className="border-r border-app-border-soft px-5 font-semibold text-[#43d9a3]">{risk.status}</td>
                 <td className="whitespace-nowrap border-r border-app-border-soft px-5">{formatDateTime(risk.createdAt)}</td>
                 <td className="px-4">{renderManagement(risk, index, `${risk.id} ${risk.riskContent}`)}</td>
@@ -462,7 +468,7 @@ export default function ReportsPage() {
             {!isLoading && pageReports.length === 0 && (
               <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center"><p className="font-medium text-app-text-soft">{loadError || '조건에 맞는 보고서가 없습니다.'}</p>{!loadError && <p className="mt-1 text-sm text-app-muted">검색어나 필터를 변경해 주세요.</p>}</td></tr>
             )}
-            {isLoading && activeCategory === 'individual' && (
+            {isLoading && (
               <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center text-app-muted">보고서 목록을 불러오는 중입니다.</td></tr>
             )}
           </tbody>

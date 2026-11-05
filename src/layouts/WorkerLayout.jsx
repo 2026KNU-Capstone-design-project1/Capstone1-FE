@@ -67,7 +67,7 @@ export default function WorkerLayout() {
   return (
     <div className="min-h-[100dvh] bg-[#dfe5e9] text-[#14232e]">
       <div className="worker-app relative mx-auto min-h-[100dvh] w-[100vw] max-w-[480px] overflow-x-hidden bg-[#f4f7f9]">
-        <header className="sticky top-6 z-30 flex h-[88px] items-end justify-between bg-[#f4f7f9]/95 px-10 pb-4 backdrop-blur-lg supports-[padding-top:env(safe-area-inset-top)]:h-[calc(72px+env(safe-area-inset-top))]">
+        <header className="sticky top-6 z-30 flex h-[88px] items-end justify-between bg-[#f4f7f9]/95 px-8 pb-4 backdrop-blur-lg supports-[padding-top:env(safe-area-inset-top)]:h-[calc(72px+env(safe-area-inset-top))]">
           <WorkerLogo />
           <div ref={menuRef} className="relative">
             <button
@@ -88,7 +88,7 @@ export default function WorkerLayout() {
           </div>
         </header>
 
-        <main className="min-w-0 px-10 pt-10 pb-[calc(116px+env(safe-area-inset-bottom))]">
+        <main className="min-w-0 px-8 pt-10 pb-[calc(116px+env(safe-area-inset-bottom))]">
           <Outlet />
         </main>
 

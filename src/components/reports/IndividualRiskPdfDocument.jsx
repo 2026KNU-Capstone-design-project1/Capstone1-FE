@@ -130,6 +130,8 @@ function MetaTable({ data }) {
 
 function wrapLongTokens(value, maxCharacters) {
   return String(value ?? '')
+    .replace(/\\\r?\n/g, '\n')
+    .replace(/\\n|\/n/g, '\n')
     .split(/(\s+)/)
     .map(token => {
       if (/^\s+$/.test(token)) return token;

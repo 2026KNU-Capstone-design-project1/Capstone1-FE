@@ -37,6 +37,7 @@ function FilterSelect({ label, value, onChange, children, className = '' }) {
 
 export default function RiskManagementPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const requestedRiskId = searchParams.get('riskId');
   const [query, setQuery] = useState('');
   const [area, setArea] = useState('all');
   const [severity, setSeverity] = useState('all');
@@ -50,7 +51,6 @@ export default function RiskManagementPage() {
   const [loadedAt, setLoadedAt] = useState(0);
   const [riskDetail, setRiskDetail] = useState(null);
   const [riskDetailError, setRiskDetailError] = useState('');
-  const requestedRiskId = searchParams.get('riskId');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -75,16 +75,19 @@ export default function RiskManagementPage() {
     return () => controller.abort();
   }, []);
 
+  const riskDetailMatchesRequest = Boolean(riskDetail && (
+    String(riskDetail.id) === requestedRiskId || riskDetail.displayCode === requestedRiskId
+  ));
+  const isRiskDetailLoading = Boolean(requestedRiskId && !riskDetailMatchesRequest && !riskDetailError);
+
   const selectedRisk = useMemo(() => {
     if (!requestedRiskId) return null;
-    if (riskDetail && (
-      String(riskDetail.id) === requestedRiskId || riskDetail.displayCode === requestedRiskId
-    )) return riskDetail;
+    if (riskDetailMatchesRequest) return riskDetail;
 
     return riskItems.find(risk => (
       String(risk.id) === requestedRiskId || risk.displayCode === requestedRiskId
     )) ?? null;
-  }, [requestedRiskId, riskDetail, riskItems]);
+  }, [requestedRiskId, riskDetail, riskDetailMatchesRequest, riskItems]);
 
   useEffect(() => {
     if (!requestedRiskId) return undefined;
@@ -307,6 +310,7 @@ export default function RiskManagementPage() {
           key={`${selectedRisk.id}-${selectedRisk.status}`}
           risk={selectedRisk}
           detailError={riskDetailError}
+          isDetailLoading={isRiskDetailLoading}
           onClose={closeRisk}
         />
       )}

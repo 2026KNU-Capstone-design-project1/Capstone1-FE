@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getHistory } from './api/history';
 import AppIcon from './components/AppIcon';
-import { riskHistoryMock } from './data/riskHistoryMock';
+import { formatDateTime, toTimestamp } from './utils/dateTime';
+
+const PAGE_SIZE = 8;
 
 const STATUS_TONE = {
   미처리: 'border-[#7a3532] bg-[#3a2222] text-[#ff7770]',
@@ -14,7 +17,18 @@ const EVENT_TONE = {
   success: 'border-[#247a58] bg-[#123f35] text-[#4dde9a]',
 };
 
-const REFERENCE_DATE = new Date('2026-11-05T23:59:59');
+function displayDate(value) {
+  return formatDateTime(value).slice(0, 10);
+}
+
+function displayDateTime(value) {
+  if (typeof value === 'string' && /(?:Z|[+-]\d{2}(?::?\d{2})?)$/.test(value)) {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return formatDateTime(parsed).slice(0, 16);
+  }
+
+  return formatDateTime(value).slice(0, 16);
+}
 
 function FilterSelect({ icon, label, value, onChange, children }) {
   return (
@@ -49,7 +63,7 @@ function SummaryCard({ label, value, icon }) {
 
 function StatusBadge({ status }) {
   return (
-    <span className={`inline-flex min-w-[82px] justify-center rounded-lg border px-3 py-1.5 text-[13px] font-medium ${STATUS_TONE[status]}`}>
+    <span className={`inline-flex min-w-[82px] justify-center rounded-lg border px-3 py-1.5 text-[13px] font-medium ${STATUS_TONE[status] ?? EVENT_TONE.default}`}>
       {status}
     </span>
   );
@@ -71,10 +85,10 @@ function RiskTimeline({ risk }) {
             const badgeTone = EVENT_TONE[event.tone ?? 'default'];
 
             return (
-              <li key={`${event.at}-${event.badge}`} className="relative grid min-h-[48px] grid-cols-[18px_190px_1px_184px_118px] items-center gap-x-8 text-[14px]">
+              <li key={event.id ?? `${event.at}-${event.badge}`} className="relative grid min-h-[48px] grid-cols-[18px_190px_1px_184px_118px] items-center gap-x-8 text-[14px]">
                 {!isLast && <span className="absolute top-1/2 bottom-[-50%] left-[8px] w-px bg-[#7690a0]" />}
                 <span className={`relative z-[1] h-[17px] w-[17px] rounded-full border-[5px] shadow-[0_0_0_3px_rgba(66,91,107,.4)] ${dotTone}`} />
-                <time className="whitespace-nowrap font-medium text-app-text">{event.at}</time>
+                <time className="whitespace-nowrap font-medium text-app-text">{displayDateTime(event.at)}</time>
                 <span className="h-7 w-px bg-app-border-soft" aria-hidden="true" />
                 <span className="whitespace-nowrap font-medium text-app-text-soft">{event.description}</span>
                 <span className={`inline-flex w-[118px] justify-center rounded-lg border px-3 py-1.5 font-medium ${badgeTone}`}>{event.badge}</span>
@@ -89,34 +103,84 @@ function RiskTimeline({ risk }) {
 
 export default function RiskHistoryPage() {
   const [period, setPeriod] = useState('all');
-  const [area, setArea] = useState('all');
+  const [facility, setFacility] = useState('all');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('latest');
+  const [page, setPage] = useState(1);
   const [expandedId, setExpandedId] = useState(null);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [summary, setSummary] = useState({ repeated: 0, longUnresolved: 0, rediscovered: 0 });
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [loadedAt, setLoadedAt] = useState(0);
 
-  const summary = useMemo(() => ({
-    repeated: riskHistoryMock.filter(risk => risk.repeated).length,
-    longUnresolved: riskHistoryMock.filter(risk => risk.longUnresolved).length,
-    rediscovered: riskHistoryMock.filter(risk => risk.rediscovered).length,
-  }), []);
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadHistory() {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const response = await getHistory({ signal: controller.signal });
+        setHistoryItems(response.histories);
+        setSummary({
+          repeated: response.repeatedDetectionCount,
+          longUnresolved: response.longTermUnresolvedCount,
+          rediscovered: response.redetectedAfterActionCount,
+        });
+        setAiAnalysis(response.aiAnalysis);
+        setLoadedAt(Date.now());
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setError(requestError.message || '위험 이력을 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    loadHistory();
+    return () => controller.abort();
+  }, []);
+
+  function update(setter) {
+    return event => {
+      setter(event.target.value);
+      setPage(1);
+      setExpandedId(null);
+    };
+  }
+
+  const facilities = useMemo(() => (
+    [...new Set(historyItems.map(risk => risk.location).filter(facilityName => facilityName && facilityName !== '-'))]
+      .sort((a, b) => a.localeCompare(b, 'ko-KR'))
+  ), [historyItems]);
 
   const risks = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ko-KR');
     const periodDays = period === '7d' ? 7 : period === '30d' ? 30 : 0;
     const periodStart = periodDays
-      ? REFERENCE_DATE.getTime() - periodDays * 24 * 60 * 60 * 1000
+      ? loadedAt - periodDays * 24 * 60 * 60 * 1000
       : 0;
 
-    return riskHistoryMock
-      .filter(risk => area === 'all' || risk.area === area)
-      .filter(risk => !periodStart || new Date(`${risk.lastDetected.replaceAll('.', '-')}T23:59:59`).getTime() >= periodStart)
-      .filter(risk => !normalizedQuery || `${risk.id} ${risk.content} ${risk.area} ${risk.location}`.toLocaleLowerCase('ko-KR').includes(normalizedQuery))
-      .toSorted((a, b) => {
+    return historyItems
+      .filter(risk => facility === 'all' || risk.location === facility)
+      .filter(risk => !periodStart || toTimestamp(risk.lastDetected) >= periodStart)
+      .filter(risk => !normalizedQuery || `${risk.displayCode} ${risk.id} ${risk.content} ${risk.area} ${risk.location}`.toLocaleLowerCase('ko-KR').includes(normalizedQuery))
+      .sort((a, b) => {
         if (sort === 'detections') return b.detectionCount - a.detectionCount;
         const direction = sort === 'oldest' ? 1 : -1;
-        return a.firstDetected.localeCompare(b.firstDetected) * direction;
+        return (toTimestamp(a.firstDetected) - toTimestamp(b.firstDetected)) * direction;
       });
-  }, [area, period, query, sort]);
+  }, [facility, historyItems, loadedAt, period, query, sort]);
+
+  const pageCount = Math.max(1, Math.ceil(risks.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageRisks = risks.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const start = risks.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0;
+  const end = Math.min(currentPage * PAGE_SIZE, risks.length);
 
   function toggleRisk(id) {
     setExpandedId(current => current === id ? null : id);
@@ -128,17 +192,14 @@ export default function RiskHistoryPage() {
         <div className="app-content-frame flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <h2 id="risk-history-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">위험 이력</h2>
           <div className="flex flex-wrap gap-3">
-            <FilterSelect icon="calendar" label="기간 선택" value={period} onChange={event => setPeriod(event.target.value)}>
+            <FilterSelect icon="calendar" label="기간 선택" value={period} onChange={update(setPeriod)}>
               <option value="all">전체 기간</option>
               <option value="7d">최근 7일</option>
               <option value="30d">최근 30일</option>
             </FilterSelect>
-            <FilterSelect icon="site" label="구역 필터" value={area} onChange={event => setArea(event.target.value)}>
-              <option value="all">전체 구역</option>
-              <option value="A구역">A구역</option>
-              <option value="B구역">B구역</option>
-              <option value="C구역">C구역</option>
-              <option value="D구역">D구역</option>
+            <FilterSelect icon="site" label="시설 필터" value={facility} onChange={update(setFacility)}>
+              <option value="all">전체 시설</option>
+              {facilities.map(facilityName => <option key={facilityName} value={facilityName}>{facilityName}</option>)}
             </FilterSelect>
           </div>
         </div>
@@ -157,10 +218,7 @@ export default function RiskHistoryPage() {
             <span>AI 이력 분석</span>
           </div>
           <span className="hidden h-10 w-px shrink-0 bg-app-border-strong sm:block" />
-          <p className="text-[14px] leading-6 text-app-text-soft">
-            최근 30일 기준 반복 탐지 위험은 B구역과 적재 구역에 집중되어 있습니다.<br className="hidden lg:block" />
-            장기 미해결 위험은 최초 발견 후 5일 이상 경과했으며, 조치 이후 재탐지 사례는 안전난간 및 작업 환경 관련 위험에서 반복되는 경향이 있습니다.
-          </p>
+          <p className="text-[14px] leading-6 text-app-text-soft">{aiAnalysis ?? 'AI 분석 결과가 아직 없습니다.'}</p>
         </aside>
 
         <section className="overflow-hidden rounded-xl border border-app-border bg-app-panel" aria-labelledby="risk-history-list-title">
@@ -178,7 +236,7 @@ export default function RiskHistoryPage() {
                   type="search"
                   placeholder="위험 ID, 위험 내용 검색"
                   value={query}
-                  onChange={event => setQuery(event.target.value)}
+                  onChange={update(setQuery)}
                 />
               </label>
               <label className="relative block sm:w-[210px]">
@@ -186,7 +244,7 @@ export default function RiskHistoryPage() {
                 <select
                   className="h-11 w-full appearance-none rounded-lg border border-app-border bg-[#071b27] px-4 pr-10 text-[14px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
                   value={sort}
-                  onChange={event => setSort(event.target.value)}
+                  onChange={update(setSort)}
                 >
                   <option value="latest">최초 발견일 최신순</option>
                   <option value="oldest">최초 발견일 오래된순</option>
@@ -210,7 +268,7 @@ export default function RiskHistoryPage() {
               </div>
 
               <div>
-                {risks.map(risk => {
+                {pageRisks.map(risk => {
                   const expanded = expandedId === risk.id;
                   return (
                     <article key={risk.id} className={`overflow-hidden transition-colors ${expanded ? 'my-2 rounded-lg border border-app-accent bg-[#0b202c]' : 'border-b border-app-border-soft last:border-b-0'}`}>
@@ -224,13 +282,13 @@ export default function RiskHistoryPage() {
                         <span className="flex min-w-0 items-center gap-4">
                           <span className={`h-8 w-1 shrink-0 rounded-full ${expanded ? 'bg-app-accent' : 'bg-[#bdd1dc]'}`} />
                           <span className="min-w-0">
-                            <strong className="block text-[15px] text-app-text">{risk.id}</strong>
+                            <strong className="block text-[15px] text-app-text">{risk.displayCode}</strong>
                             <span className="mt-0.5 block truncate text-[13px] text-app-text-soft">{risk.content}</span>
                           </span>
                         </span>
                         <span>{risk.area} · {risk.location}</span>
-                        <time>{risk.firstDetected}</time>
-                        <time>{risk.lastDetected}</time>
+                        <time>{displayDate(risk.firstDetected)}</time>
+                        <time>{displayDate(risk.lastDetected)}</time>
                         <span>{risk.detectionCount}회</span>
                         <span><StatusBadge status={risk.status} /></span>
                         <span className="grid place-items-center">
@@ -241,13 +299,29 @@ export default function RiskHistoryPage() {
                     </article>
                   );
                 })}
-                {risks.length === 0 && (
-                  <div className="grid min-h-40 place-items-center text-[14px] text-app-muted">조건에 맞는 위험 이력이 없습니다.</div>
+                {!isLoading && pageRisks.length === 0 && (
+                  <div className="grid min-h-40 place-items-center text-[14px] text-app-muted">{error || '조건에 맞는 위험 이력이 없습니다.'}</div>
+                )}
+                {isLoading && (
+                  <div className="grid min-h-40 place-items-center text-[14px] text-app-muted">위험 이력을 불러오는 중입니다.</div>
                 )}
               </div>
             </div>
           </div>
         </section>
+
+        {!isLoading && risks.length > 0 && (
+          <div className="flex min-h-[62px] items-center justify-between gap-4">
+            <p className="text-[15px] text-[#9abbd0]">{start}-{end} / {risks.length}건</p>
+            <nav className="flex items-center gap-[7px]" aria-label="위험 이력 목록 페이지">
+              <button className="grid h-[40px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => { setPage(value => Math.max(1, value - 1)); setExpandedId(null); }}><AppIcon name="chevronLeft" className="h-5 w-5" /></button>
+              {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => (
+                <button key={number} className={`h-[40px] min-w-[40px] rounded-lg border px-3 text-[14px] transition-colors ${number === currentPage ? 'border-app-accent bg-[#101e27] text-app-accent' : 'border-app-border text-[#9abbd0] hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => { setPage(number); setExpandedId(null); }}>{number}</button>
+              ))}
+              <button className="grid h-[40px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => { setPage(value => Math.min(pageCount, value + 1)); setExpandedId(null); }}><AppIcon name="chevronRight" className="h-5 w-5" /></button>
+            </nav>
+          </div>
+        )}
       </div>
     </section>
   );

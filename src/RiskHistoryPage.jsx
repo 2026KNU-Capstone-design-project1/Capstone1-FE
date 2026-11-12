@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getHistory } from './api/history';
+import { getHistory, getHistoryAiAnalysis } from './api/history';
 import AppIcon from './components/AppIcon';
 import { formatDateTime, toTimestamp } from './utils/dateTime';
 
@@ -111,6 +111,8 @@ export default function RiskHistoryPage() {
   const [historyItems, setHistoryItems] = useState([]);
   const [summary, setSummary] = useState({ repeated: 0, longUnresolved: 0, rediscovered: 0 });
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [isAiLoading, setIsAiLoading] = useState(true);
+  const [aiError, setAiError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadedAt, setLoadedAt] = useState(0);
@@ -130,7 +132,6 @@ export default function RiskHistoryPage() {
           longUnresolved: response.longTermUnresolvedCount,
           rediscovered: response.redetectedAfterActionCount,
         });
-        setAiAnalysis(response.aiAnalysis);
         setLoadedAt(Date.now());
       } catch (requestError) {
         if (requestError.name !== 'AbortError') {
@@ -142,6 +143,28 @@ export default function RiskHistoryPage() {
     }
 
     loadHistory();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadAiAnalysis() {
+      setIsAiLoading(true);
+      setAiError('');
+
+      try {
+        setAiAnalysis(await getHistoryAiAnalysis({ signal: controller.signal }));
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setAiError(requestError.message || 'AI 이력 분석을 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsAiLoading(false);
+      }
+    }
+
+    loadAiAnalysis();
     return () => controller.abort();
   }, []);
 
@@ -218,7 +241,9 @@ export default function RiskHistoryPage() {
             <span>AI 이력 분석</span>
           </div>
           <span className="hidden h-10 w-px shrink-0 bg-app-border-strong sm:block" />
-          <p className="text-[14px] leading-6 text-app-text-soft">{aiAnalysis ?? 'AI 분석 결과가 아직 없습니다.'}</p>
+          <p className="whitespace-pre-line text-[14px] leading-6 text-app-text-soft" aria-live="polite">
+            {isAiLoading ? 'AI 이력을 분석하는 중입니다.' : (aiError || aiAnalysis)}
+          </p>
         </aside>
 
         <section className="overflow-hidden rounded-xl border border-app-border bg-app-panel" aria-labelledby="risk-history-list-title">

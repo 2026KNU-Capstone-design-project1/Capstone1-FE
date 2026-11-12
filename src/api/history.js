@@ -73,9 +73,23 @@ export async function getHistory(options = {}) {
     repeatedDetectionCount: toCount(response.repeatedDetectionCount),
     longTermUnresolvedCount: toCount(response.longTermUnresolvedCount),
     redetectedAfterActionCount: toCount(response.redetectedAfterActionCount),
-    aiAnalysis: typeof response.aiAnalysis === 'string' && response.aiAnalysis.trim()
-      ? response.aiAnalysis.trim()
-      : null,
     histories: response.histories.map(toHistoryItem),
   };
+}
+
+export async function getHistoryAiAnalysis(options = {}) {
+  const response = await authorizedRequest('/api/history/ai-analysis', {
+    ...options,
+    method: 'POST',
+  });
+
+  if (!response || typeof response !== 'object' || Array.isArray(response)) {
+    throw new Error('AI 이력 분석 응답 형식이 올바르지 않습니다.');
+  }
+
+  if (typeof response.aiAnalysis !== 'string' || !response.aiAnalysis.trim()) {
+    throw new Error('AI 이력 분석 결과가 없습니다.');
+  }
+
+  return response.aiAnalysis.trim();
 }

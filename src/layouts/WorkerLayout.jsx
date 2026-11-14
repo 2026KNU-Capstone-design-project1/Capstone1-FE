@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AppIcon from '../components/AppIcon';
 import { getAccessToken, getUserRole, isWorkerRole, logout } from '../api/auth';
-import { workerMock } from '../data/workerMock';
 
 const workerNavigation = [
   { to: '/worker', label: '홈', icon: 'home', end: true },
@@ -36,6 +35,7 @@ export default function WorkerLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [workerUserName, setWorkerUserName] = useState('');
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function WorkerLayout() {
             </button>
             {menuOpen && (
               <div className="absolute top-12 right-0 w-40 overflow-hidden rounded-2xl border border-[#e6ebee] bg-white p-2">
-                <p className="border-b border-[#edf0f2] px-3 py-2.5 text-[13px] font-bold text-[#44515a]">{workerMock.user.name} 작업자</p>
+                <p className="border-b border-[#edf0f2] px-3 py-2.5 text-[13px] font-bold text-[#44515a]">{workerUserName ? `${workerUserName} 작업자` : '작업자'}</p>
                 <button className="w-full rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold text-[#d65d21] hover:bg-[#fff4ef]" type="button" onClick={handleLogout}>로그아웃</button>
               </div>
             )}
@@ -89,7 +89,7 @@ export default function WorkerLayout() {
         </header>
 
         <main className="min-w-0 px-[25px] pt-[26px] pb-[calc(125px+env(safe-area-inset-bottom))]">
-          <Outlet />
+          <Outlet context={{ setWorkerUserName }} />
         </main>
 
         <nav className="fixed right-0 bottom-0 left-0 z-30 mx-auto grid h-[100px] w-full max-w-[430px] grid-cols-4 border-t border-[#e0e5e8] bg-white/95 px-2 pb-[max(28px,env(safe-area-inset-bottom))] backdrop-blur-xl" aria-label="작업자 메뉴">

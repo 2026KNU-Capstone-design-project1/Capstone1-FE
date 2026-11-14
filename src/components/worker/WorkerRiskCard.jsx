@@ -12,7 +12,7 @@ export default function WorkerRiskCard({ risk, priority = false }) {
     <Link
       to={`/worker/actions/${risk.id}`}
       className={`group flex items-center gap-3 rounded-[19px] border border-[#e1e6e9] bg-white pr-[21px] shadow-[0_5px_16px_rgba(35,54,68,0.025)] transition-transform active:scale-[.985] ${priority ? 'h-[84px] pl-[29px]' : 'h-[80px] pl-[21px]'}`}
-      aria-label={`${risk.title}, ${risk.severity}, ${risk.status}`}
+      aria-label={[risk.title, risk.severity, risk.status].filter(Boolean).join(', ')}
     >
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[19px] leading-6 font-extrabold tracking-[-.6px] text-[#14232e]">{risk.title}</span>

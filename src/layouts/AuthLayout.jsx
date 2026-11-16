@@ -1,9 +1,19 @@
+import { useState } from 'react';
 import BrandLogo from '../components/BrandLogo';
+import ThemeToggle from '../components/ThemeToggle';
 import { FactoryIllustration } from '../AuthVisuals';
+import { getStoredTheme, saveTheme } from '../utils/theme';
 
 export default function AuthLayout({ ariaLabel, children }) {
+  const [theme, setTheme] = useState(getStoredTheme);
+
+  function handleThemeChange(nextTheme) {
+    setTheme(nextTheme);
+    saveTheme(nextTheme);
+  }
+
   return (
-    <main className="login-layout min-h-screen bg-auth-background text-app-text">
+    <main className="login-layout relative min-h-screen bg-auth-background text-app-text transition-colors duration-200">
       <section className="brand-panel relative isolate overflow-visible" aria-labelledby="brand-title">
         <div className="brand-logo absolute z-20">
           <BrandLogo />
@@ -15,14 +25,20 @@ export default function AuthLayout({ ariaLabel, children }) {
           </h1>
           
         </div>
-        <FactoryIllustration />
+        <FactoryIllustration theme={theme} />
       </section>
 
       <section className="form-panel flex items-center justify-center rounded-xl" aria-label={ariaLabel}>
-        <div className="auth-card w-full rounded-xl border border-app-border-soft">
+        <div className="auth-card w-full rounded-xl border border-auth-card-border">
           {children}
         </div>
       </section>
+      <ThemeToggle
+        theme={theme}
+        onChange={handleThemeChange}
+        compact
+        className="fixed right-5 bottom-5 z-50 sm:right-7 sm:bottom-7"
+      />
     </main>
   );
 }

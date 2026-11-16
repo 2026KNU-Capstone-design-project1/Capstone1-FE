@@ -127,14 +127,14 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
       }}
     >
       <section
-        className="flex max-h-[calc(100dvh-32px)] w-full max-w-[850px] flex-col overflow-hidden rounded-xl border border-app-border bg-[#061b26] text-app-text shadow-2xl sm:max-h-[calc(100dvh-48px)]"
+        className="flex max-h-[calc(100dvh-32px)] w-full max-w-[850px] flex-col overflow-hidden rounded-xl border border-app-border bg-app-surface text-app-text shadow-2xl sm:max-h-[calc(100dvh-48px)]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="risk-detail-title"
       >
         <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-app-border-soft px-7">
           <h2 id="risk-detail-title" className="text-[22px] font-bold tracking-[-.4px]">위험 상세</h2>
-          <button ref={closeButtonRef} className="grid h-10 w-10 place-items-center rounded-lg text-[#9eb4c2] transition-colors hover:bg-app-hover hover:text-white" type="button" onClick={onClose} aria-label="위험 상세 닫기">
+          <button ref={closeButtonRef} className="grid h-10 w-10 place-items-center rounded-lg text-app-muted transition-colors hover:bg-app-hover hover:text-app-text" type="button" onClick={onClose} aria-label="위험 상세 닫기">
             <AppIcon name="close" className="h-7 w-7" strokeWidth={1.35} />
           </button>
         </header>
@@ -166,7 +166,7 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
                   />
                 )}
                 {showImageLoading && (
-                  <div className="absolute inset-0 grid place-items-center bg-[#071b27]" role="status" aria-label="위험 이미지 불러오는 중">
+                  <div className="absolute inset-0 grid place-items-center bg-app-control" role="status" aria-label="위험 이미지 불러오는 중">
                     <div className="text-center">
                       <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-app-border-strong border-t-app-accent" aria-hidden="true" />
                       <p className="mt-3 text-sm text-app-text-soft">이미지를 불러오는 중입니다.</p>
@@ -174,7 +174,7 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
                   </div>
                 )}
                 {!showImageLoading && (detailError || imageFailed) && (
-                  <div className="absolute inset-0 grid place-items-center bg-[#071b27] px-6 text-center text-sm text-app-muted" role="status">
+                  <div className="absolute inset-0 grid place-items-center bg-app-control px-6 text-center text-sm text-app-muted" role="status">
                     이미지를 불러오지 못했습니다.
                   </div>
                 )}
@@ -213,7 +213,7 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
             <div className="overflow-hidden rounded-lg border border-app-border">
               {history.map((item, index) => (
                 <div key={`${item.detectedAt}-${index}`} className="grid min-h-[46px] grid-cols-[200px_minmax(0,1fr)] items-center border-b border-app-border-soft px-4 text-[14px] last:border-b-0 max-sm:grid-cols-1 max-sm:gap-1 max-sm:py-3">
-                  <time className="text-[#9eb4c2]">{formatDateTime(item.detectedAt)}</time>
+                  <time className="text-app-muted">{formatDateTime(item.detectedAt)}</time>
                   <p>{item.description}</p>
                 </div>
               ))}
@@ -224,7 +224,7 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
             <button className="h-11 rounded-lg border border-[#829ba9] px-6 text-[14px] font-medium transition-colors hover:bg-app-hover" type="button">담당자 지정</button>
             <div ref={statusControlRef} className="relative w-[141px]">
               {statusMenuOpen && (
-                <div className="absolute right-0 bottom-[calc(100%+8px)] z-10 w-full overflow-hidden rounded-lg border border-app-border-strong bg-[#0a2230] p-1 shadow-2xl" role="listbox" aria-label="처리 상태 선택">
+                <div className="absolute right-0 bottom-[calc(100%+8px)] z-10 w-full overflow-hidden rounded-lg border border-app-border-strong bg-app-panel p-1 shadow-2xl" role="listbox" aria-label="처리 상태 선택">
                   {STATUS_OPTIONS.map(option => (
                     <button
                       key={option}
@@ -241,7 +241,7 @@ export default function RiskDetailModal({ risk, detailError = '', isDetailLoadin
                 </div>
               )}
               <button
-                className="h-11 w-full rounded-lg bg-app-accent px-4 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]"
+                className="h-11 w-full rounded-lg bg-app-accent px-4 text-[14px] font-bold text-app-accent-text transition-colors hover:brightness-110"
                 type="button"
                 aria-haspopup="listbox"
                 aria-expanded={statusMenuOpen}

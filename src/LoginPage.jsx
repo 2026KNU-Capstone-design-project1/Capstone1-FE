@@ -97,7 +97,7 @@ export default function LoginPage({ onLogin, signupHref = '/signup', forgotPassw
           <div className="input-shell flex h-[59px] items-center gap-5 rounded-lg border border-auth-input bg-auth-input-bg px-5 text-auth-icon">
             <AppIcon name="lock" className="h-6 w-6 shrink-0" strokeWidth={1.5} />
             <input id="login-password" name="password" className="min-w-0 flex-1 bg-transparent text-[18px] text-app-text outline-none placeholder:text-auth-placeholder" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="비밀번호를 입력하세요" value={password} onChange={event => setPassword(event.target.value)} required disabled={isSubmitting} />
-            <button className="-mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded hover:text-white" type="button" aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>
+            <button className="-mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded hover:text-app-text" type="button" aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'} aria-pressed={showPassword} onClick={() => setShowPassword(current => !current)}>
               <AppIcon name={showPassword ? 'eye' : 'eyeOff'} className="h-6 w-6" strokeWidth={1.5} />
             </button>
           </div>

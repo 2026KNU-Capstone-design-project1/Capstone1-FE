@@ -24,7 +24,7 @@ function FilterSelect({ label, value, onChange, children, className = '' }) {
     <label className={`relative block min-w-0 ${className}`}>
       <span className="sr-only">{label}</span>
       <select
-        className="h-[46px] w-full appearance-none rounded-lg border border-app-border bg-[#071b27] px-5 pr-11 text-[15px] text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
+        className="h-[46px] w-full appearance-none rounded-lg border border-app-border bg-app-control px-5 pr-11 text-[15px] text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
         value={value}
         onChange={onChange}
       >
@@ -176,12 +176,12 @@ export default function RiskManagementPage() {
         <h2 id="risk-management-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">위험 관리</h2>
       </div>
 
-      <div className="grid gap-3 rounded-xl border border-app-border bg-[#071b27] p-[14px] md:grid-cols-2 xl:grid-cols-[minmax(260px,2.2fr)_minmax(140px,1fr)_minmax(140px,.94fr)_minmax(140px,1fr)_minmax(210px,1.35fr)_minmax(180px,1.16fr)]">
+      <div className="grid min-h-[46px] items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(220px,2.2fr)_minmax(120px,1.05fr)_minmax(120px,.98fr)_minmax(120px,.98fr)_minmax(150px,1.1fr)_minmax(0,1fr)_auto]">
         <label className="relative block min-w-0">
           <span className="sr-only">위험 검색</span>
           <AppIcon name="search" className="pointer-events-none absolute top-1/2 left-4 h-[25px] w-[25px] -translate-y-1/2 text-app-text-soft" />
           <input
-            className="h-[46px] w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-[#54839c] hover:border-app-border-hover focus:border-app-accent"
+            className="h-[46px] w-full rounded-lg border border-app-border bg-app-control pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-app-muted hover:border-app-border-hover focus:border-app-accent"
             type="search"
             placeholder="위험 내용 또는 위치 검색"
             value={query}
@@ -207,37 +207,27 @@ export default function RiskManagementPage() {
           <option value="처리중">처리중</option>
           <option value="처리 완료">처리 완료</option>
         </FilterSelect>
-        <label className="relative block min-w-0 border-l border-app-border-soft pl-3">
-          <span className="sr-only">발견 기간</span>
-          <AppIcon name="calendar" className="pointer-events-none absolute top-1/2 left-7 h-[22px] w-[22px] -translate-y-1/2 text-app-text-soft" />
-          <select
-            className="h-[46px] w-full appearance-none rounded-lg border border-app-border bg-[#071b27] pr-11 pl-[53px] text-[15px] text-[#54839c] outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
-            value={period}
-            onChange={update(setPeriod)}
-          >
-            <option value="all">발견 기간</option>
-            <option value="7d">최근 7일</option>
-            <option value="30d">최근 30일</option>
-          </select>
-          <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
-        </label>
-        <label className="relative block min-w-0 border-l border-app-border-soft pl-3">
+        <FilterSelect label="발견 기간" value={period} onChange={update(setPeriod)}>
+          <option value="all">발견 기간</option>
+          <option value="7d">최근 7일</option>
+          <option value="30d">최근 30일</option>
+        </FilterSelect>
+        <label className="relative block min-w-[104px] justify-self-end xl:col-start-7">
           <span className="sr-only">정렬</span>
-          <AppIcon name="sort" className="pointer-events-none absolute top-1/2 left-7 h-[23px] w-[23px] -translate-y-1/2 text-app-text" />
           <select
-            className="h-[46px] w-full appearance-none rounded-lg border border-app-border bg-[#071b27] pr-11 pl-[53px] text-[15px] text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
+            className="h-[46px] w-full appearance-none border-0 bg-transparent pr-9 pl-3 text-[15px] text-app-text outline-none transition-colors hover:text-app-accent focus:text-app-accent [&>option]:bg-app-control [&>option]:text-app-text"
             value={sort}
             onChange={update(setSort)}
           >
             <option value="latest">최신순 </option>
             <option value="oldest">오래된순</option>
           </select>
-          <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
+          <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
         </label>
       </div>
 
       <p className="mt-[25px] mb-2 text-[22px] font-bold tracking-[-.4px] text-app-text">
-        전체 위험 <strong className="ml-1 text-[24px] text-[#ff661f]">{risks.length}</strong><span className="ml-1 font-normal text-[#79a7c0]">건</span>
+        전체 위험 <strong className="ml-1 text-[24px] text-app-accent">{risks.length}</strong><span className="ml-1 font-normal text-app-muted">건</span>
       </p>
 
       <div className="overflow-x-auto rounded-t-xl border border-app-border border-b-0">
@@ -246,7 +236,7 @@ export default function RiskManagementPage() {
             <col className="w-[8%]" /><col className="w-[18%]" /><col className="w-[13.5%]" /><col className="w-[8.5%]" /><col className="w-[8.5%]" />
             <col className="w-[12.5%]" /><col className="w-[12.5%]" /><col className="w-[8.5%]" /><col className="w-[9.5%]" />
           </colgroup>
-          <thead className="bg-[#0a2230] text-app-text-soft">
+          <thead className="bg-app-table-head text-app-text-soft">
             <tr className="h-[51px]">
               {['ID', '위험 내용', '위치', '위험 등급', '처리 상태', '발견일시', '해결일시', '관련 영상', '담당자'].map(label => (
                 <th key={label} className="border-r border-app-border-soft px-5 font-medium last:border-r-0">{label}</th>
@@ -257,7 +247,7 @@ export default function RiskManagementPage() {
             {pageRisks.map(risk => (
               <tr
                 key={risk.id}
-                className="h-12 cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
+                className="h-12 cursor-pointer border-t border-app-border-soft bg-app-surface text-app-text-soft transition-colors hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
                 tabIndex="0"
                 role="button"
                 aria-label={`${risk.displayCode} ${risk.content} 상세 보기`}
@@ -281,12 +271,12 @@ export default function RiskManagementPage() {
               </tr>
             ))}
             {!isLoading && pageRisks.length === 0 && (
-              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]">
+              <tr className="h-48 border-t border-app-border-soft bg-app-surface">
                 <td colSpan="9" className="text-center text-app-muted">{error || '조건에 맞는 위험이 없습니다.'}</td>
               </tr>
             )}
             {isLoading && (
-              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]">
+              <tr className="h-48 border-t border-app-border-soft bg-app-surface">
                 <td colSpan="9" className="text-center text-app-muted">위험 목록을 불러오는 중입니다.</td>
               </tr>
             )}
@@ -295,11 +285,11 @@ export default function RiskManagementPage() {
       </div>
 
       <div className="flex min-h-[78px] items-center justify-between gap-4 border-t border-app-border-soft pt-[20px]">
-        <p className="text-[17px] text-[#9abbd0]">{start}-{end} / {risks.length}건</p>
+        <p className="text-[17px] text-app-muted">{start}-{end} / {risks.length}건</p>
         <nav className="flex items-center gap-[7px]" aria-label="위험 목록 페이지">
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => setPage(value => Math.max(1, value - 1))}><AppIcon name="chevronLeft" className="h-5 w-5" /></button>
           {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => (
-            <button key={number} className={`h-[42px] min-w-[40px] rounded-lg border px-3 text-[15px] transition-colors ${number === currentPage ? 'border-app-accent bg-[#101e27] text-app-accent' : 'border-app-border text-[#9abbd0] hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => setPage(number)}>{number}</button>
+            <button key={number} className={`h-[42px] min-w-[40px] rounded-lg border px-3 text-[15px] transition-colors ${number === currentPage ? 'border-app-accent bg-app-selected text-app-accent' : 'border-app-border text-app-muted hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => setPage(number)}>{number}</button>
           ))}
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}><AppIcon name="chevronRight" className="h-5 w-5" /></button>
         </nav>

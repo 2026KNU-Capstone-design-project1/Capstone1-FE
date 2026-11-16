@@ -1,29 +1,83 @@
-import AppIcon from '../AppIcon';
+import { useState } from 'react';
 
-export default function RecentAlerts({ alerts }) {
+const SEVERITY_STYLES = {
+  HIGH: 'border-app-high-border bg-app-high-bg text-app-high-text',
+  MEDIUM: 'border-app-medium-border bg-app-medium-bg text-app-medium-text',
+  LOW: 'border-app-low-border bg-app-low-bg text-app-low-text',
+};
+
+const STATUS_LABELS = {
+  OPEN: '미처리',
+  IN_PROGRESS: '처리중',
+};
+
+export default function UnresolvedRiskList({ risks, selectedRiskId, onSelect }) {
+  const [statusFilter, setStatusFilter] = useState('OPEN');
+  const filteredRisks = risks.filter(risk => risk.status === statusFilter);
+
+  function changeStatusFilter(status) {
+    setStatusFilter(status);
+    const firstRisk = risks.find(risk => risk.status === status);
+    if (firstRisk) onSelect(firstRisk);
+  }
+
   return (
-    <section className="min-h-0 flex-1 rounded-xl border border-app-border bg-app-panel p-3.5" aria-labelledby="recent-alerts-title">
-      <div className="flex items-center justify-between border-b border-app-border-soft pb-4">
-        <h2 id="recent-alerts-title" className="text-[15px] font-bold">최신 알림</h2>
-        <button className="flex items-center gap-1 text-[11px] text-app-muted hover:text-white" type="button">
-          전체보기
-          <AppIcon name="chevronRight" className="h-4 w-4" />
-        </button>
+    <section className="flex min-h-0 flex-1 flex-col rounded-xl border border-app-border bg-app-panel p-3.5" aria-labelledby="risk-list-title">
+      <div className="flex items-center justify-between gap-3 border-b border-app-border-soft pb-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <h2 id="risk-list-title" className="shrink-0 text-[20px] font-bold">위험 목록</h2>
+          <div className="flex items-center rounded-lg border border-app-border bg-app-control p-0.5" aria-label="위험 처리 상태 필터">
+            {[
+              ['OPEN', '미처리'],
+              ['IN_PROGRESS', '처리중'],
+            ].map(([status, label]) => (
+              <button
+                key={status}
+                className={`rounded-md px-2 py-0.5 text-[10px] font-bold transition-colors ${statusFilter === status ? 'bg-app-accent text-app-accent-text' : 'text-app-muted hover:text-app-text'}`}
+                type="button"
+                aria-pressed={statusFilter === status}
+                onClick={() => changeStatusFilter(status)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <span className="shrink-0 text-[11px] text-app-muted">{filteredRisks.length}건</span>
       </div>
 
-      <div>
-        {alerts.map(alert => (
-          <article key={alert.id} className="grid grid-cols-[60px_8px_minmax(0,1fr)_40px_54px] items-center gap-2.5 border-b border-app-border-soft py-2.5 last:border-b-0 max-[1450px]:grid-cols-[52px_8px_minmax(0,1fr)_48px]">
-            <img className="h-[54px] w-[60px] rounded-md object-cover max-[1450px]:h-12 max-[1450px]:w-[52px]" src={alert.image} alt="" />
-            <span className="h-2 w-2 rounded-full bg-app-danger" />
-            <div className="min-w-0">
-              <h3 className="truncate text-[14px] text-app-text">{alert.title}</h3>
-              <p className="mt-1 truncate text-[10px] text-app-muted">{alert.location}</p>
-            </div>
-            <time className="text-[11px] text-app-text-soft">{alert.time}</time>
-            <span className="rounded-lg border border-[#7f2326] bg-[#381d24] px-2.5 py-2.5 text-center text-[10px] text-[#ff4c43] max-[1450px]:hidden">{alert.severity}</span>
-          </article>
-        ))}
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        {filteredRisks.map(risk => {
+          const severity = String(risk.severity).toUpperCase();
+          const selected = selectedRiskId === risk.id;
+
+          return (
+            <button
+              key={risk.id}
+              className={`my-1.5 w-full rounded-lg border px-3 py-2.5 text-left transition-colors first:mt-2 ${selected ? 'border-app-accent bg-app-selected shadow-[inset_3px_0_0_var(--color-app-accent)]' : 'border-transparent border-b-app-border-soft hover:border-app-border hover:bg-app-hover'}`}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onSelect(risk)}
+            >
+              <span className="flex items-start justify-between gap-3">
+                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-app-text">{risk.content}</span>
+                <span className={`shrink-0 rounded-md border px-2 py-1 text-[10px] font-extrabold ${SEVERITY_STYLES[severity] ?? SEVERITY_STYLES.MEDIUM}`}>
+                  {severity}
+                </span>
+              </span>
+              <span className="mt-1 block truncate text-[11px] text-app-muted">
+                {risk.area} · {risk.facility}
+              </span>
+              <span className="mt-2 flex items-center justify-between gap-3 text-[11px] text-app-text-soft">
+                <span>{STATUS_LABELS[risk.status] ?? risk.status} {risk.statusDate}</span>
+                <span className="truncate">담당자 {risk.assignee}</span>
+              </span>
+            </button>
+          );
+        })}
+        {filteredRisks.length === 0 && (
+          <p className="py-10 text-center text-[12px] text-app-muted">해당 상태의 위험이 없습니다.</p>
+        )}
       </div>
     </section>
   );

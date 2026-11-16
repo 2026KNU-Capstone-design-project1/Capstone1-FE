@@ -17,7 +17,7 @@ export default function PasswordField({ id, label, value, onChange, placeholder,
       <label className={signupLabelClass} htmlFor={id}>{label}</label>
       <div className="relative">
         <input id={id} className={`${signupInputClass} pr-12`} type={visible ? 'text' : 'password'} autoComplete="new-password" placeholder={placeholder} value={value} onChange={event => onChange(event.target.value)} required disabled={disabled} />
-        <button type="button" className="absolute inset-y-0 right-3 flex items-center justify-center text-auth-icon hover:text-white" aria-label={visible ? `${label} 숨기기` : `${label} 표시`} aria-pressed={visible} onClick={() => setVisible(current => !current)}>
+        <button type="button" className="absolute inset-y-0 right-3 flex items-center justify-center text-auth-icon hover:text-app-text" aria-label={visible ? `${label} 숨기기` : `${label} 표시`} aria-pressed={visible} onClick={() => setVisible(current => !current)}>
           <AppIcon name={visible ? 'eyeOff' : 'eye'} className="h-5 w-5" />
         </button>
       </div>

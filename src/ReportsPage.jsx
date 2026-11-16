@@ -8,14 +8,14 @@ import { loadPdfImage } from './utils/image';
 const PAGE_SIZE = 7;
 
 const TYPE_META = {
-  regular: { label: '정기', tone: 'bg-[#0b354c] text-[#50c7ff]' },
-  adHoc: { label: '수시', tone: 'bg-[#332d27] text-app-accent' },
+  regular: { label: '정기', tone: 'bg-app-chip text-app-info' },
+  adHoc: { label: '수시', tone: 'bg-app-active text-app-accent' },
 };
 
 const RISK_LEVEL_META = {
-  HIGH: 'border-[#ff5964]/30 bg-[#3a2029] text-[#ff747d]',
-  MEDIUM: 'border-[#ff9b42]/30 bg-[#382a22] text-[#ffad63]',
-  LOW: 'border-[#4eb8ff]/30 bg-[#133149] text-[#69c3ff]',
+  HIGH: 'border-app-high-border bg-app-high-bg text-app-high-text',
+  MEDIUM: 'border-app-medium-border bg-app-medium-bg text-app-medium-text',
+  LOW: 'border-app-low-border bg-app-low-bg text-app-low-text',
 };
 
 function displayDate(value) {
@@ -34,7 +34,7 @@ function SelectField({ label, value, onChange, icon, children, className = '' })
       <span className="sr-only">{label}</span>
       {icon && <AppIcon name={icon} className="pointer-events-none absolute top-1/2 left-4 h-[23px] w-[23px] -translate-y-1/2 text-app-text-soft" />}
       <select
-        className={`h-[48px] w-full appearance-none rounded-lg border border-app-border bg-[#071b27] pr-11 text-[15px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent ${icon ? 'pl-[52px]' : 'pl-5'}`}
+        className={`h-[46px] w-full appearance-none rounded-lg border border-app-border bg-app-control pr-11 text-[15px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent ${icon ? 'pl-[52px]' : 'pl-5'}`}
         value={value}
         onChange={onChange}
       >
@@ -83,26 +83,26 @@ function ReportFormModal({ onClose, onCreate }) {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-5" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className="w-full max-w-[560px] rounded-xl border border-app-border-strong bg-[#0a1d29] shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-report-title">
+      <section className="w-full max-w-[560px] rounded-xl border border-app-border-strong bg-app-panel shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-report-title">
         <div className="flex items-center justify-between border-b border-app-border-soft px-6 py-5">
           <div>
             <h3 id="create-report-title" className="text-[22px] font-bold text-app-text">AI 보고서 생성</h3>
             <p className="mt-1 text-sm text-app-muted">분석할 기간과 보고서 유형을 선택해 주세요.</p>
           </div>
-          <button className="grid h-9 w-9 place-items-center rounded-lg text-app-muted transition-colors hover:bg-app-hover hover:text-white" type="button" onClick={onClose} aria-label="닫기"><AppIcon name="close" className="h-5 w-5" /></button>
+          <button className="grid h-9 w-9 place-items-center rounded-lg text-app-muted transition-colors hover:bg-app-hover hover:text-app-text" type="button" onClick={onClose} aria-label="닫기"><AppIcon name="close" className="h-5 w-5" /></button>
         </div>
 
         <form className="space-y-5 px-6 py-6" onSubmit={submit}>
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-app-text-soft">보고서명</span>
-            <input ref={nameRef} className="h-12 w-full rounded-lg border border-app-border bg-[#071b27] px-4 text-[15px] text-app-text outline-none placeholder:text-app-muted focus:border-app-accent" value={name} onChange={event => { setName(event.target.value); setError(''); }} placeholder="예: 10월 안전 종합 분석 보고서" />
+            <input ref={nameRef} className="h-12 w-full rounded-lg border border-app-border bg-app-control px-4 text-[15px] text-app-text outline-none placeholder:text-app-muted focus:border-app-accent" value={name} onChange={event => { setName(event.target.value); setError(''); }} placeholder="예: 10월 안전 종합 분석 보고서" />
           </label>
 
           <fieldset>
             <legend className="mb-2 text-sm font-medium text-app-text-soft">보고서 유형</legend>
             <div className="grid grid-cols-2 gap-3">
               {[['regular', '정기 보고서'], ['adHoc', '수시 보고서']].map(([value, label]) => (
-                <label key={value} className={`flex h-12 cursor-pointer items-center justify-center rounded-lg border text-[15px] font-medium transition-colors ${type === value ? 'border-app-accent bg-app-active text-app-accent' : 'border-app-border bg-[#071b27] text-app-text-soft hover:border-app-border-hover'}`}>
+                <label key={value} className={`flex h-12 cursor-pointer items-center justify-center rounded-lg border text-[15px] font-medium transition-colors ${type === value ? 'border-app-accent bg-app-active text-app-accent' : 'border-app-border bg-app-control text-app-text-soft hover:border-app-border-hover'}`}>
                   <input className="sr-only" type="radio" name="reportType" value={value} checked={type === value} onChange={event => setType(event.target.value)} />
                   {label}
                 </label>
@@ -113,19 +113,19 @@ function ReportFormModal({ onClose, onCreate }) {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-app-text-soft">분석 시작일</span>
-              <input className="h-12 w-full rounded-lg border border-app-border bg-[#071b27] px-4 text-[15px] text-app-text outline-none focus:border-app-accent [color-scheme:dark]" type="date" value={analysisStart} onChange={event => { setAnalysisStart(event.target.value); setError(''); }} required />
+              <input className="h-12 w-full rounded-lg border border-app-border bg-app-control px-4 text-[15px] text-app-text outline-none focus:border-app-accent" type="date" value={analysisStart} onChange={event => { setAnalysisStart(event.target.value); setError(''); }} required />
             </label>
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-app-text-soft">분석 종료일</span>
-              <input className="h-12 w-full rounded-lg border border-app-border bg-[#071b27] px-4 text-[15px] text-app-text outline-none focus:border-app-accent [color-scheme:dark]" type="date" value={analysisEnd} onChange={event => { setAnalysisEnd(event.target.value); setError(''); }} required />
+              <input className="h-12 w-full rounded-lg border border-app-border bg-app-control px-4 text-[15px] text-app-text outline-none focus:border-app-accent" type="date" value={analysisEnd} onChange={event => { setAnalysisEnd(event.target.value); setError(''); }} required />
             </label>
           </div>
 
-          {error && <p className="rounded-lg bg-[#30212d] px-4 py-3 text-sm text-app-danger" role="alert">{error}</p>}
+          {error && <p className="rounded-lg bg-app-danger-soft px-4 py-3 text-sm text-app-danger" role="alert">{error}</p>}
 
           <div className="flex justify-end gap-3 pt-1">
             <button className="h-11 rounded-lg border border-app-border px-5 text-sm font-medium text-app-text-soft transition-colors hover:bg-app-hover" type="button" onClick={onClose}>취소</button>
-            <button className="h-11 rounded-lg bg-app-accent px-6 text-sm font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="submit">보고서 생성</button>
+            <button className="h-11 rounded-lg bg-app-accent px-6 text-sm font-bold text-app-accent-text transition-colors hover:brightness-110" type="submit">보고서 생성</button>
           </div>
         </form>
       </section>
@@ -356,13 +356,13 @@ export default function ReportsPage() {
   function renderManagement(item, index, displayName) {
     return (
       <div className="flex items-center justify-center gap-2">
-        <button className="grid h-9 w-9 place-items-center rounded-lg text-app-text transition-colors hover:bg-[#14303f]" type="button" aria-label={`${displayName} 다운로드`} title="다운로드" onClick={event => { event.stopPropagation(); void downloadItem(item); }}><AppIcon name="download" className="h-[22px] w-[22px]" /></button>
+        <button className="grid h-9 w-9 place-items-center rounded-lg text-app-text transition-colors hover:bg-app-hover" type="button" aria-label={`${displayName} 다운로드`} title="다운로드" onClick={event => { event.stopPropagation(); void downloadItem(item); }}><AppIcon name="download" className="h-[22px] w-[22px]" /></button>
         <div className="relative" data-report-menu>
-          <button className="grid h-9 w-9 place-items-center rounded-lg text-app-text transition-colors hover:bg-[#14303f]" type="button" aria-label={`${displayName} 관리 메뉴`} aria-haspopup="menu" aria-expanded={openMenu === item.id} onClick={event => { event.stopPropagation(); setOpenMenu(current => current === item.id ? null : item.id); }}><AppIcon name="more" className="h-5 w-5" /></button>
+          <button className="grid h-9 w-9 place-items-center rounded-lg text-app-text transition-colors hover:bg-app-hover" type="button" aria-label={`${displayName} 관리 메뉴`} aria-haspopup="menu" aria-expanded={openMenu === item.id} onClick={event => { event.stopPropagation(); setOpenMenu(current => current === item.id ? null : item.id); }}><AppIcon name="more" className="h-5 w-5" /></button>
           {openMenu === item.id && (
-            <div className={`absolute right-0 z-20 w-32 overflow-hidden rounded-lg border border-app-border-strong bg-[#102632] py-1 shadow-xl ${index >= pageReports.length - 2 ? 'bottom-10' : 'top-10'}`} role="menu" onClick={event => event.stopPropagation()}>
-              <button className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-app-text-soft hover:bg-[#183542] hover:text-white" type="button" role="menuitem" onClick={() => duplicateItem(item)}><AppIcon name="copy" className="h-4 w-4" />복제</button>
-              <button className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-app-danger hover:bg-[#30212d]" type="button" role="menuitem" onClick={() => deleteItem(item)}><AppIcon name="trash" className="h-4 w-4" />삭제</button>
+            <div className={`absolute right-0 z-20 w-32 overflow-hidden rounded-lg border border-app-border-strong bg-app-panel py-1 shadow-xl ${index >= pageReports.length - 2 ? 'bottom-10' : 'top-10'}`} role="menu" onClick={event => event.stopPropagation()}>
+              <button className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-app-text-soft hover:bg-app-hover hover:text-app-text" type="button" role="menuitem" onClick={() => duplicateItem(item)}><AppIcon name="copy" className="h-4 w-4" />복제</button>
+              <button className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-app-danger hover:bg-app-danger-soft" type="button" role="menuitem" onClick={() => deleteItem(item)}><AppIcon name="trash" className="h-4 w-4" />삭제</button>
             </div>
           )}
         </div>
@@ -375,7 +375,7 @@ export default function ReportsPage() {
       <div className="mb-2 flex min-h-[48px] items-start justify-between gap-4">
         <h2 id="reports-title" className="text-[28px] font-bold tracking-[-.7px] text-app-text">AI 보고서</h2>
         {/*}
-        <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="button" onClick={() => setCreateOpen(true)}>
+        <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-app-accent-text transition-colors hover:brightness-110" type="button" onClick={() => setCreateOpen(true)}>
           <AppIcon name="plus" className="h-5 w-5" strokeWidth={2} />
           보고서 생성
         </button>
@@ -386,7 +386,7 @@ export default function ReportsPage() {
         {tabs.map(tab => (
           <button
             key={tab.value}
-            className={`relative min-w-[132px] px-5 py-[15px] text-[16px] font-medium transition-colors after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[3px] ${activeCategory === tab.value ? 'text-app-accent after:bg-app-accent' : 'text-app-text-soft after:bg-transparent hover:text-white'}`}
+            className={`relative min-w-[132px] px-5 py-[15px] text-[16px] font-medium transition-colors after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[3px] ${activeCategory === tab.value ? 'text-app-accent after:bg-app-accent' : 'text-app-text-soft after:bg-transparent hover:text-app-text'}`}
             type="button"
             role="tab"
             aria-selected={activeCategory === tab.value}
@@ -397,11 +397,11 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      <div className="grid gap-3 rounded-xl border border-app-border bg-[#071b27] p-[14px] md:grid-cols-2 xl:grid-cols-[minmax(280px,2fr)_minmax(170px,.8fr)_minmax(210px,1fr)_minmax(190px,.9fr)]">
+      <div className="grid min-h-[46px] items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,365px)_minmax(150px,175px)_minmax(170px,195px)_minmax(0,1fr)_auto]">
         <label className="relative block min-w-0">
           <span className="sr-only">보고서 검색</span>
           <AppIcon name="search" className="pointer-events-none absolute top-1/2 left-4 h-[25px] w-[25px] -translate-y-1/2 text-app-text-soft" />
-          <input className="h-[48px] w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-[#6f8796] hover:border-app-border-hover focus:border-app-accent" type="search" placeholder={activeCategory === 'summary' ? '보고서명 또는 기간 검색' : '위험 내용 또는 발견 위치 검색'} value={query} onChange={event => resetPage(setQuery)(event.target.value)} />
+          <input className="h-[46px] w-full rounded-lg border border-app-border bg-app-control pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-app-muted hover:border-app-border-hover focus:border-app-accent" type="search" placeholder={activeCategory === 'summary' ? '보고서명 또는 기간 검색' : '위험 내용 또는 발견 위치 검색'} value={query} onChange={event => resetPage(setQuery)(event.target.value)} />
         </label>
         <SelectField label={activeCategory === 'summary' ? '보고서 유형' : '위험 유형'} value={typeFilter} onChange={event => resetPage(setTypeFilter)(event.target.value)}>
           {activeCategory === 'summary' ? (
@@ -417,24 +417,32 @@ export default function ReportsPage() {
             </>
           )}
         </SelectField>
-        <SelectField label="생성 기간" icon="calendar" value={period} onChange={event => resetPage(setPeriod)(event.target.value)}>
+        <SelectField label="생성 기간" value={period} onChange={event => resetPage(setPeriod)(event.target.value)}>
           <option value="all">전체 생성 기간</option>
           {periods.map(value => {
             const [year, month] = value.split('-');
             return <option key={value} value={value}>{year}년 {Number(month)}월</option>;
           })}
         </SelectField>
-        <SelectField label="정렬" icon="sort" value={sort} onChange={event => resetPage(setSort)(event.target.value)}>
-          <option value="latest">최신 생성순</option>
-          <option value="oldest">오래된 생성순</option>
-          <option value="name">{activeCategory === 'summary' ? '보고서명순' : '위험 내용순'}</option>
-          <option value="risk">{activeCategory === 'summary' ? '포함 위험 많은순' : '위험 등급 높은순'}</option>
-        </SelectField>
+        <label className="relative block min-w-[132px] justify-self-end xl:col-start-5">
+          <span className="sr-only">정렬</span>
+          <select
+            className="h-[46px] w-full appearance-none border-0 bg-transparent pr-9 pl-3 text-[15px] text-app-text outline-none transition-colors hover:text-app-accent focus:text-app-accent [&>option]:bg-app-control [&>option]:text-app-text"
+            value={sort}
+            onChange={event => resetPage(setSort)(event.target.value)}
+          >
+            <option value="latest">최신 생성순</option>
+            <option value="oldest">오래된 생성순</option>
+            <option value="name">{activeCategory === 'summary' ? '보고서명순' : '위험 내용순'}</option>
+            <option value="risk">{activeCategory === 'summary' ? '포함 위험 많은순' : '위험 등급 높은순'}</option>
+          </select>
+          <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
+        </label>
       </div>
 
       <p className="mt-[25px] mb-2 text-[22px] font-bold tracking-[-.4px] text-app-text">
         {activeCategory === 'summary' ? '종합 보고서' : '개별 보고서'}
-        <strong className="ml-2 text-[24px] text-app-accent">{filteredReports.length}</strong><span className="ml-1 font-normal text-[#79a7c0]">건</span>
+        <strong className="ml-2 text-[24px] text-app-accent">{filteredReports.length}</strong><span className="ml-1 font-normal text-app-muted">건</span>
       </p>
 
       <div className="overflow-x-auto rounded-xl border border-app-border">
@@ -448,7 +456,7 @@ export default function ReportsPage() {
               <col className="w-[24%]" /><col className="w-[21%]" /><col className="w-[11%]" /><col className="w-[11%]" /><col className="w-[11%]" /><col className="w-[13%]" /><col className="w-[9%]" />
             </colgroup>
           )}
-          <thead className="bg-[#0a2230] text-app-text-soft">
+          <thead className="bg-app-table-head text-app-text-soft">
             <tr className="h-[57px]">
               {(activeCategory === 'summary'
                 ? ['보고서명', '보고서 유형', '분석 기간', '포함 위험', '생성일', '생성 상태', '관리']
@@ -458,41 +466,41 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {activeCategory === 'summary' ? pageReports.map((report, index) => (
-              <tr key={report.id} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-[#09222f] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${report.name} 상세 보기`} onClick={() => navigate(`/reports/${report.id}`, { state: { report } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/${report.id}`, { state: { report } }); } }}>
+              <tr key={report.id} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-app-surface text-app-text-soft transition-colors hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${report.name} 상세 보기`} onClick={() => navigate(`/reports/${report.id}`, { state: { report } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/${report.id}`, { state: { report } }); } }}>
                 <td className="truncate border-r border-app-border-soft px-5 font-medium text-app-text" title={report.name}>{report.name}</td>
                 <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[62px] justify-center rounded-md px-3 py-1.5 font-bold ${TYPE_META[report.type].tone}`}>{TYPE_META[report.type].label}</span></td>
                 <td className="whitespace-nowrap border-r border-app-border-soft px-5">{displayDate(report.analysisStart)} ~ {displayDate(report.analysisEnd)}</td>
                 <td className="border-r border-app-border-soft px-5 text-center">{report.riskCount}건</td>
                 <td className="whitespace-nowrap border-r border-app-border-soft px-5">{formatDateTime(report.createdAt)}</td>
-                <td className="border-r border-app-border-soft px-5 font-semibold text-[#43d9a3]">{report.status}</td>
+                <td className="border-r border-app-border-soft px-5 font-semibold text-app-success">{report.status}</td>
                 <td className="px-4">{renderManagement(report, index, report.name)}</td>
               </tr>
             )) : pageReports.map((risk, index) => (
-              <tr key={risk.reportId} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-[#061b26] text-app-text-soft transition-colors hover:bg-[#09222f] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${risk.id} ${risk.riskContent} 상세 보기`} onClick={() => navigate(`/reports/individual/${risk.reportId}`, { state: { risk } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/individual/${risk.reportId}`, { state: { risk } }); } }}>
+              <tr key={risk.reportId} className="h-[65px] cursor-pointer border-t border-app-border-soft bg-app-surface text-app-text-soft transition-colors hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent" tabIndex="0" role="link" aria-label={`${risk.id} ${risk.riskContent} 상세 보기`} onClick={() => navigate(`/reports/individual/${risk.reportId}`, { state: { risk } })} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(`/reports/individual/${risk.reportId}`, { state: { risk } }); } }}>
                 <td className="border-r border-app-border-soft px-5"><div className="truncate font-medium text-app-text" title={risk.riskContent}>{risk.riskContent}</div><div className="mt-0.5 text-xs text-app-muted">{risk.id}</div></td>
                 <td className="truncate border-r border-app-border-soft px-5" title={risk.location}>{risk.location}</td>
                 <td className="truncate border-r border-app-border-soft px-5" title={risk.riskType}>{risk.riskType}</td>
                 <td className="border-r border-app-border-soft px-5"><span className={`inline-flex min-w-[78px] justify-center rounded-md border px-3 py-1.5 text-[13px] font-bold ${RISK_LEVEL_META[risk.riskLevel] ?? 'border-app-border text-app-text-soft'}`}>{risk.riskLevel}</span></td>
-                <td className="border-r border-app-border-soft px-5 font-semibold text-[#43d9a3]">{risk.status}</td>
+                <td className="border-r border-app-border-soft px-5 font-semibold text-app-success">{risk.status}</td>
                 <td className="whitespace-nowrap border-r border-app-border-soft px-5">{formatDateTime(risk.createdAt)}</td>
                 <td className="px-4">{renderManagement(risk, index, `${risk.id} ${risk.riskContent}`)}</td>
               </tr>
             ))}
             {!isLoading && pageReports.length === 0 && (
-              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center"><p className="font-medium text-app-text-soft">{loadError || '조건에 맞는 보고서가 없습니다.'}</p>{!loadError && <p className="mt-1 text-sm text-app-muted">검색어나 필터를 변경해 주세요.</p>}</td></tr>
+              <tr className="h-48 border-t border-app-border-soft bg-app-surface"><td colSpan="7" className="text-center"><p className="font-medium text-app-text-soft">{loadError || '조건에 맞는 보고서가 없습니다.'}</p>{!loadError && <p className="mt-1 text-sm text-app-muted">검색어나 필터를 변경해 주세요.</p>}</td></tr>
             )}
             {isLoading && (
-              <tr className="h-48 border-t border-app-border-soft bg-[#061b26]"><td colSpan="7" className="text-center text-app-muted">보고서 목록을 불러오는 중입니다.</td></tr>
+              <tr className="h-48 border-t border-app-border-soft bg-app-surface"><td colSpan="7" className="text-center text-app-muted">보고서 목록을 불러오는 중입니다.</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       <div className="flex min-h-[74px] items-center justify-between gap-4 pt-[18px]">
-        <p className="text-[17px] text-[#9abbd0]">{start}-{end} / {filteredReports.length}건</p>
+        <p className="text-[17px] text-app-muted">{start}-{end} / {filteredReports.length}건</p>
         <nav className="flex items-center gap-[7px]" aria-label="보고서 목록 페이지">
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => setPage(value => Math.max(1, value - 1))}><AppIcon name="chevronLeft" className="h-5 w-5" /></button>
-          {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => <button key={number} className={`h-[42px] min-w-[40px] rounded-lg border px-3 text-[15px] transition-colors ${number === currentPage ? 'border-app-accent bg-[#101e27] text-app-accent' : 'border-app-border text-[#9abbd0] hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => setPage(number)}>{number}</button>)}
+          {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => <button key={number} className={`h-[42px] min-w-[40px] rounded-lg border px-3 text-[15px] transition-colors ${number === currentPage ? 'border-app-accent bg-app-selected text-app-accent' : 'border-app-border text-app-muted hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => setPage(number)}>{number}</button>)}
           <button className="grid h-[42px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}><AppIcon name="chevronRight" className="h-5 w-5" /></button>
         </nav>
       </div>

@@ -17,8 +17,8 @@ const analysisLabels = {
 };
 
 const analysisTones = {
-  complete: 'text-[#43d596]',
-  processing: 'text-[#4ba3f5]',
+  complete: 'text-app-success',
+  processing: 'text-app-info',
   failed: 'text-app-danger',
 };
 
@@ -41,7 +41,7 @@ function VideoCard({ video }) {
   const hasRisk = video.riskIssueCount > 0;
 
   return (
-    <article className="overflow-hidden rounded-xl border border-app-border bg-[#071c28] transition-colors hover:border-app-border-hover">
+    <article className="overflow-hidden rounded-xl border border-app-border bg-app-surface transition-colors hover:border-app-border-hover">
       <div className="relative h-[118px] overflow-hidden bg-[#102733]">
         <img
           className="h-full w-full object-cover opacity-75 transition-transform duration-300 hover:scale-[1.03]"
@@ -69,7 +69,7 @@ function VideoCard({ video }) {
         <div className="mt-2.5 flex min-h-[35px] items-center border-t border-app-border-soft pt-2.5 text-[12px]">
           {video.analysisStatus === 'processing' && <p className="text-app-text-soft">위험 이슈 집계 전</p>}
           {video.analysisStatus === 'failed' && (
-            <p className="flex w-full items-center gap-2 rounded-md bg-[#30212d] px-2.5 py-2 text-app-danger">
+            <p className="flex w-full items-center gap-2 rounded-md bg-app-danger-soft px-2.5 py-2 text-app-danger">
               <FailureIcon className="h-4 w-4 shrink-0" />
               분석 실패 · 재분석 필요
             </p>
@@ -79,7 +79,7 @@ function VideoCard({ video }) {
             <p className="flex flex-wrap items-center gap-x-2 text-app-text-soft">
               <span>위험 {video.riskIssueCount}건</span><span className="text-app-muted">·</span>
               <span className="text-app-danger">고위험 {video.highRiskCount}건</span><span className="text-app-muted">·</span>
-              <span className={video.unresolvedRiskCount > 0 ? 'text-[#4ba3f5]' : 'text-[#43d596]'}>미해결 {video.unresolvedRiskCount}건</span>
+              <span className={video.unresolvedRiskCount > 0 ? 'text-app-info' : 'text-app-success'}>미해결 {video.unresolvedRiskCount}건</span>
             </p>
           )}
         </div>
@@ -120,7 +120,7 @@ export default function VideoFolderPage() {
               영상 관리
             </Link>
           </h2>
-          <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="button">
+          <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-app-accent-text transition-colors hover:brightness-110" type="button">
             <UploadIcon className="h-5 w-5" />
             영상 업로드
           </button>
@@ -132,7 +132,7 @@ export default function VideoFolderPage() {
           <span className="font-semibold text-app-text">{folder.date.replaceAll('-', '.')}</span>
         </nav>
 
-        <div className="mt-3 flex min-h-[78px] items-center gap-5 rounded-xl border border-app-border bg-[#071c28] px-6">
+        <div className="mt-3 flex min-h-[78px] items-center gap-5 rounded-xl border border-app-border bg-app-surface px-6">
           <FolderIcon className="h-11 w-11 shrink-0" />
           <div>
             <h3 className="text-[19px] font-bold text-app-text">{folder.date.replaceAll('-', '.')}</h3>

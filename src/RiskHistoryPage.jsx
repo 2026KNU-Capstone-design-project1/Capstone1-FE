@@ -6,15 +6,15 @@ import { formatDateTime, toTimestamp } from './utils/dateTime';
 const PAGE_SIZE = 8;
 
 const STATUS_TONE = {
-  미처리: 'border-[#7a3532] bg-[#3a2222] text-[#ff7770]',
-  처리중: 'border-[#9b570f] bg-[#4a301b] text-[#ff981f]',
-  해결완료: 'border-[#247a58] bg-[#123f35] text-[#4dde9a]',
+  미처리: 'border-app-high-border bg-app-high-bg text-app-high-text',
+  처리중: 'border-app-medium-border bg-app-warning-soft text-app-medium-text',
+  해결완료: 'border-app-success bg-app-success-soft text-app-success',
 };
 
 const EVENT_TONE = {
-  default: 'border-app-border-strong bg-[#193442] text-app-text-soft',
-  warning: 'border-[#9b570f] bg-[#4a301b] text-[#ff981f]',
-  success: 'border-[#247a58] bg-[#123f35] text-[#4dde9a]',
+  default: 'border-app-border-strong bg-app-chip text-app-text-soft',
+  warning: 'border-app-medium-border bg-app-warning-soft text-app-medium-text',
+  success: 'border-app-success bg-app-success-soft text-app-success',
 };
 
 function displayDate(value) {
@@ -36,7 +36,7 @@ function FilterSelect({ icon, label, value, onChange, children }) {
       <span className="sr-only">{label}</span>
       <AppIcon name={icon} className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
       <select
-        className="h-11 w-full appearance-none rounded-lg border border-app-border bg-[#071b27] pr-10 pl-12 text-[14px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent sm:w-[220px]"
+        className="h-11 w-full appearance-none rounded-lg border border-app-border bg-app-control pr-10 pl-12 text-[14px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent sm:w-[220px]"
         value={value}
         onChange={onChange}
       >
@@ -56,7 +56,7 @@ function SummaryCard({ label, value, icon }) {
           {value}<span className="ml-1 text-[17px]">건</span>
         </p>
       </div>
-      <AppIcon name={icon} className="h-8 w-8 shrink-0 text-[#9fb5c4]" />
+      <AppIcon name={icon} className="h-8 w-8 shrink-0 text-app-icon" />
     </article>
   );
 }
@@ -71,7 +71,7 @@ function StatusBadge({ status }) {
 
 function RiskTimeline({ risk }) {
   return (
-    <div id={`history-${risk.id}`} className="border-t border-app-border-soft bg-[#061b26] px-7 py-6 sm:px-12">
+    <div id={`history-${risk.id}`} className="border-t border-app-border-soft bg-app-surface px-7 py-6 sm:px-12">
       <div className="grid gap-6 xl:grid-cols-[152px_minmax(0,1fr)] xl:gap-8">
         <h4 className="pt-1 text-[17px] font-bold text-app-text">위험 처리 이력</h4>
         <ol className="w-[640px] max-w-full">
@@ -87,7 +87,7 @@ function RiskTimeline({ risk }) {
             return (
               <li key={event.id ?? `${event.at}-${event.badge}`} className="relative grid min-h-[48px] grid-cols-[18px_190px_1px_184px_118px] items-center gap-x-8 text-[14px]">
                 {!isLast && <span className="absolute top-1/2 bottom-[-50%] left-[8px] w-px bg-[#7690a0]" />}
-                <span className={`relative z-[1] h-[17px] w-[17px] rounded-full border-[5px] shadow-[0_0_0_3px_rgba(66,91,107,.4)] ${dotTone}`} />
+                <span className={`history-timeline-dot relative z-[1] h-[17px] w-[17px] rounded-full border-[5px] ${dotTone}`} />
                 <time className="whitespace-nowrap font-medium text-app-text">{displayDateTime(event.at)}</time>
                 <span className="h-7 w-px bg-app-border-soft" aria-hidden="true" />
                 <span className="whitespace-nowrap font-medium text-app-text-soft">{event.description}</span>
@@ -235,7 +235,7 @@ export default function RiskHistoryPage() {
           <SummaryCard label="조치 이후 재탐지 위험" value={summary.rediscovered} icon="history" />
         </div>
 
-        <aside className="flex items-center gap-5 rounded-xl border border-app-border bg-[linear-gradient(90deg,#0a2130,#081c28)] px-6 py-4" aria-label="AI 이력 분석">
+        <aside className="ai-analysis-panel flex items-center gap-5 rounded-xl border border-app-border px-6 py-4" aria-label="AI 이력 분석">
           <div className="flex shrink-0 items-center gap-3 text-[17px] font-bold text-app-text">
             <AppIcon name="sparkles" className="h-7 w-7 text-app-accent" />
             <span>AI 이력 분석</span>
@@ -257,7 +257,7 @@ export default function RiskHistoryPage() {
                 <span className="sr-only">위험 이력 검색</span>
                 <AppIcon name="search" className="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
                 <input
-                  className="h-11 w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-11 text-[14px] text-app-text outline-none transition-colors placeholder:text-app-muted hover:border-app-border-hover focus:border-app-accent"
+                  className="h-11 w-full rounded-lg border border-app-border bg-app-control pr-4 pl-11 text-[14px] text-app-text outline-none transition-colors placeholder:text-app-muted hover:border-app-border-hover focus:border-app-accent"
                   type="search"
                   placeholder="위험 ID, 위험 내용 검색"
                   value={query}
@@ -267,7 +267,7 @@ export default function RiskHistoryPage() {
               <label className="relative block sm:w-[210px]">
                 <span className="sr-only">정렬 기준</span>
                 <select
-                  className="h-11 w-full appearance-none rounded-lg border border-app-border bg-[#071b27] px-4 pr-10 text-[14px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
+                  className="h-11 w-full appearance-none rounded-lg border border-app-border bg-app-control px-4 pr-10 text-[14px] font-medium text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent"
                   value={sort}
                   onChange={update(setSort)}
                 >
@@ -296,7 +296,7 @@ export default function RiskHistoryPage() {
                 {pageRisks.map(risk => {
                   const expanded = expandedId === risk.id;
                   return (
-                    <article key={risk.id} className={`overflow-hidden transition-colors ${expanded ? 'my-2 rounded-lg border border-app-accent bg-[#0b202c]' : 'border-b border-app-border-soft last:border-b-0'}`}>
+                    <article key={risk.id} className={`overflow-hidden transition-colors ${expanded ? 'my-2 rounded-lg border border-app-accent bg-app-selected' : 'border-b border-app-border-soft last:border-b-0'}`}>
                       <button
                         className={`grid min-h-[68px] w-full grid-cols-[minmax(250px,1.7fr)_minmax(170px,1.05fr)_minmax(125px,.8fr)_minmax(125px,.8fr)_minmax(100px,.65fr)_minmax(140px,.8fr)_64px] items-center px-5 text-left text-[14px] text-app-text-soft transition-colors hover:bg-app-hover ${expanded ? 'bg-[linear-gradient(90deg,rgba(255,129,24,.07),rgba(255,255,255,.02))]' : ''}`}
                         type="button"
@@ -337,11 +337,11 @@ export default function RiskHistoryPage() {
 
         {!isLoading && risks.length > 0 && (
           <div className="flex min-h-[62px] items-center justify-between gap-4">
-            <p className="text-[15px] text-[#9abbd0]">{start}-{end} / {risks.length}건</p>
+            <p className="text-[15px] text-app-muted">{start}-{end} / {risks.length}건</p>
             <nav className="flex items-center gap-[7px]" aria-label="위험 이력 목록 페이지">
               <button className="grid h-[40px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => { setPage(value => Math.max(1, value - 1)); setExpandedId(null); }}><AppIcon name="chevronLeft" className="h-5 w-5" /></button>
               {Array.from({ length: pageCount }, (_, index) => index + 1).map(number => (
-                <button key={number} className={`h-[40px] min-w-[40px] rounded-lg border px-3 text-[14px] transition-colors ${number === currentPage ? 'border-app-accent bg-[#101e27] text-app-accent' : 'border-app-border text-[#9abbd0] hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => { setPage(number); setExpandedId(null); }}>{number}</button>
+                <button key={number} className={`h-[40px] min-w-[40px] rounded-lg border px-3 text-[14px] transition-colors ${number === currentPage ? 'border-app-accent bg-app-selected text-app-accent' : 'border-app-border text-app-muted hover:bg-app-hover'}`} type="button" aria-current={number === currentPage ? 'page' : undefined} onClick={() => { setPage(number); setExpandedId(null); }}>{number}</button>
               ))}
               <button className="grid h-[40px] w-[40px] place-items-center rounded-lg border border-app-border text-app-text-soft transition-colors hover:bg-app-hover disabled:cursor-not-allowed disabled:opacity-35" type="button" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => { setPage(value => Math.min(pageCount, value + 1)); setExpandedId(null); }}><AppIcon name="chevronRight" className="h-5 w-5" /></button>
             </nav>

@@ -4,6 +4,7 @@ import { getIndividualReport } from './api/reports';
 import AppIcon from './components/AppIcon';
 import { IndividualRiskPdfDocument } from './components/reports/IndividualRiskPdfDocument';
 import PdfPreviewWorkspace from './components/reports/PdfPreviewWorkspace';
+import IndividualReportLoadingWorkspace from './components/reports/IndividualReportLoadingWorkspace';
 import { buildIndividualRiskPdfData, individualRiskPdfFileName } from './data/individualReportPdfData';
 import { loadPdfImage } from './utils/image';
 
@@ -53,7 +54,7 @@ export default function IndividualReportDetailPage() {
   }, [reportId]);
 
   if (isLoading) {
-    return <div className="grid min-h-[520px] place-items-center text-sm text-app-text-soft">개별 보고서를 불러오고 있습니다…</div>;
+    return <IndividualReportLoadingWorkspace />;
   }
 
   if (!risk || !pdfData || !pdfDocument) {

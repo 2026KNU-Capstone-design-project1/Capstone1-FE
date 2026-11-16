@@ -49,7 +49,7 @@ export function FilterSelect({ label, value, onChange, children, icon }) {
       <span className="sr-only">{label}</span>
       {icon && <AppIcon name={icon} className="pointer-events-none absolute top-1/2 left-4 h-[22px] w-[22px] -translate-y-1/2 text-app-text-soft" />}
       <select
-        className={`h-[46px] w-full appearance-none rounded-lg border border-app-border bg-[#071b27] pr-11 text-[15px] text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent ${icon ? 'pl-[50px]' : 'pl-5'}`}
+        className={`h-[46px] w-full appearance-none rounded-lg border border-app-border bg-app-control pr-11 text-[15px] text-app-text outline-none transition-colors hover:border-app-border-hover focus:border-app-accent ${icon ? 'pl-[50px]' : 'pl-5'}`}
         value={value}
         onChange={onChange}
       >
@@ -65,7 +65,7 @@ function FolderCard({ folder, onOpen }) {
 
   return (
     <article
-      className="group flex min-h-[170px] cursor-pointer flex-col rounded-xl border border-app-border bg-[#071c28] px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-[#09212e] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
+      className="group flex min-h-[170px] cursor-pointer flex-col rounded-xl border border-app-border bg-app-surface px-[18px] py-[17px] transition-colors hover:border-app-border-hover hover:bg-app-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-app-accent"
       role="link"
       tabIndex="0"
       aria-label={`${folder.date} 영상 폴더 열기`}
@@ -85,7 +85,7 @@ function FolderCard({ folder, onOpen }) {
             영상 {folder.videoCount}개 <span className="mx-1 text-app-muted">·</span> 분석 완료 {folder.analyzedCount}/{folder.videoCount}
           </p>
         </div>
-        <button className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-app-text-soft transition-colors hover:bg-[#14303f] hover:text-white" type="button" aria-label={`${folder.date} 폴더 메뉴`} onClick={event => event.stopPropagation()}>
+        <button className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-app-text-soft transition-colors hover:bg-app-hover hover:text-app-text" type="button" aria-label={`${folder.date} 폴더 메뉴`} onClick={event => event.stopPropagation()}>
           <AppIcon name="more" className="h-5 w-5" />
         </button>
       </div>
@@ -94,15 +94,15 @@ function FolderCard({ folder, onOpen }) {
         <div className="grid min-h-[49px] grid-cols-3 divide-x divide-app-border-soft">
           <div className="px-2 text-center first:pl-0">
             <p className="text-[12px] text-app-muted">위험 이슈</p>
-            <p className="mt-0.5 text-[21px] font-bold text-[#a9bac6]">{folder.riskIssueCount}<span className="text-[15px]">건</span></p>
+            <p className="mt-0.5 text-[21px] font-bold text-app-text-soft">{folder.riskIssueCount}<span className="text-[15px]">건</span></p>
           </div>
           <div className="px-2 text-center">
             <p className="text-[12px] font-medium text-app-danger">고위험</p>
             <p className="mt-0.5 text-[21px] font-bold text-app-danger">{folder.highRiskCount}<span className="text-[15px]">건</span></p>
           </div>
           <div className="px-2 text-center last:pr-0">
-            <p className={`text-[12px] font-medium ${allResolved ? 'text-[#43d596]' : 'text-[#4ba3f5]'}`}>미해결 위험</p>
-            <p className={`mt-0.5 text-[21px] font-bold ${allResolved ? 'text-[#43d596]' : 'text-[#4ba3f5]'}`}>
+            <p className={`text-[12px] font-medium ${allResolved ? 'text-app-success' : 'text-app-info'}`}>미해결 위험</p>
+            <p className={`mt-0.5 text-[21px] font-bold ${allResolved ? 'text-app-success' : 'text-app-info'}`}>
               {folder.unresolvedCount}<span className="text-[15px]">건</span>
             </p>
           </div>
@@ -165,14 +165,14 @@ export default function VideoManagementPage() {
               영상 관리
             </button>
           </h2>
-          <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-[#071823] transition-colors hover:bg-[#ff982f]" type="button">
+          <button className="flex h-[48px] shrink-0 items-center gap-2 rounded-lg bg-app-accent px-6 text-[14px] font-bold text-app-accent-text transition-colors hover:brightness-110" type="button">
             <UploadIcon className="h-5 w-5" />
             영상 업로드
           </button>
         </div>
 
-        <div className="grid gap-3 rounded-xl border border-app-border bg-[#071b27] p-[14px] md:grid-cols-2 xl:grid-cols-[minmax(265px,1.45fr)_minmax(170px,.88fr)_minmax(300px,2.4fr)_minmax(170px,.86fr)]">
-          <FilterSelect label="조회 기간" value={period} onChange={event => setPeriod(event.target.value)} icon="calendar">
+        <div className="grid min-h-[46px] items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(160px,165px)_minmax(160px,165px)_minmax(260px,275px)_minmax(0,1fr)_auto]">
+          <FilterSelect label="조회 기간" value={period} onChange={event => setPeriod(event.target.value)}>
             <option value="all">전체 기간</option>
             <option value="october">2026.10.01 ~ 2026.10.31</option>
             <option value="september">2026.09.01 ~ 2026.09.30</option>
@@ -187,17 +187,25 @@ export default function VideoManagementPage() {
             <span className="sr-only">영상 폴더 검색</span>
             <AppIcon name="search" className="pointer-events-none absolute top-1/2 left-4 h-[25px] w-[25px] -translate-y-1/2 text-app-text-soft" />
             <input
-              className="h-[46px] w-full rounded-lg border border-app-border bg-[#071b27] pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-[#6f8796] hover:border-app-border-hover focus:border-app-accent"
+              className="h-[46px] w-full rounded-lg border border-app-border bg-app-control pr-4 pl-[53px] text-[15px] text-app-text outline-none transition-colors placeholder:text-app-muted hover:border-app-border-hover focus:border-app-accent"
               type="search"
-              placeholder="날짜로 검색 (예: 2026-10-19)"
+              placeholder="날짜 검색"
               value={query}
               onChange={event => setQuery(event.target.value)}
             />
           </label>
-          <FilterSelect label="정렬" value={sort} onChange={event => setSort(event.target.value)} icon="sort">
-            <option value="latest">최신순</option>
-            <option value="oldest">오래된순</option>
-          </FilterSelect>
+          <label className="relative block min-w-[104px] justify-self-end xl:col-start-5">
+            <span className="sr-only">정렬</span>
+            <select
+              className="h-[46px] w-full appearance-none border-0 bg-transparent pr-9 pl-3 text-[15px] text-app-text outline-none transition-colors hover:text-app-accent focus:text-app-accent [&>option]:bg-app-control [&>option]:text-app-text"
+              value={sort}
+              onChange={event => setSort(event.target.value)}
+            >
+              <option value="latest">최신순</option>
+              <option value="oldest">오래된순</option>
+            </select>
+            <AppIcon name="chevronDown" className="pointer-events-none absolute top-1/2 right-2 h-5 w-5 -translate-y-1/2 text-app-text-soft" />
+          </label>
         </div>
       </div>
 

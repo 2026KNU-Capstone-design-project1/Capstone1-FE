@@ -3,7 +3,7 @@ import AppIcon from '../AppIcon';
 export default function NotificationMenu({ alerts, unreadIds, open, onToggle, onRead, onReadAll }) {
   return (
     <div className="relative">
-      <button className="relative grid h-10 w-10 place-items-center rounded-lg text-app-text transition-colors hover:bg-app-hover hover:text-white" type="button" aria-label={`알림 ${unreadIds.length}개`} aria-expanded={open} onClick={onToggle}>
+      <button className="relative grid h-10 w-10 place-items-center rounded-lg text-app-text transition-colors hover:bg-app-hover hover:text-app-accent" type="button" aria-label={`알림 ${unreadIds.length}개`} aria-expanded={open} onClick={onToggle}>
         <AppIcon name="bell" className="h-6 w-6" />
         {unreadIds.length > 0 && <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-app-danger" />}
       </button>

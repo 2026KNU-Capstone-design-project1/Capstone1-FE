@@ -19,7 +19,7 @@ export default function MetricCard({ metric }) {
       </div>
       <AppIcon
         name={metric.icon}
-        className="h-8 w-8 shrink-0 text-[#8fa4b4]"
+        className="h-8 w-8 shrink-0 text-app-icon"
         strokeWidth={metric.icon === 'flame' ? 1.3 : 1.7}
       />
     </article>

@@ -1,9 +1,9 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
+import { getDashboard } from './api/dashboard';
 import MetricCard from './components/dashboard/MetricCard';
 import UnresolvedRiskList from './components/dashboard/RecentAlerts';
 import RiskDetailCard from './components/dashboard/RiskDetailCard';
-import { dashboardMock } from './data/dashboardMock';
 
 const Factory3DView = lazy(() => import('./components/dashboard/Factory3DView'));
 const FACTORY_MODEL_URL = `${import.meta.env.BASE_URL}models/factory_large.glb`;
@@ -17,12 +17,66 @@ function MapLoadingFallback() {
 }
 
 export default function DashboardPage() {
-  const dashboard = dashboardMock;
   const navigate = useNavigate();
   const { theme } = useOutletContext();
-  const [selectedRisk, setSelectedRisk] = useState(
-    () => dashboard.unresolvedRisks.find(risk => risk.status === 'OPEN') ?? dashboard.featuredRisk,
-  );
+  const [dashboard, setDashboard] = useState(null);
+  const [selectedRisk, setSelectedRisk] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadDashboard() {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const nextDashboard = await getDashboard({ signal: controller.signal });
+        const initialRisk = nextDashboard.unresolvedRisks.find(risk => risk.status === 'OPEN') ?? null;
+
+        setDashboard(nextDashboard);
+        setSelectedRisk(initialRisk);
+      } catch (requestError) {
+        if (requestError.name !== 'AbortError') {
+          setDashboard(null);
+          setSelectedRisk(null);
+          setError(requestError.message || '대시보드를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    loadDashboard();
+    return () => controller.abort();
+  }, [reloadKey]);
+
+  if (isLoading) {
+    return (
+      <div className="grid min-h-[520px] place-items-center rounded-xl border border-app-border bg-app-panel" role="status">
+        <p className="text-sm font-medium text-app-muted">대시보드를 불러오는 중입니다.</p>
+      </div>
+    );
+  }
+
+  if (!dashboard) {
+    return (
+      <div className="grid min-h-[520px] place-items-center rounded-xl border border-app-border bg-app-panel px-6 text-center" role="alert">
+        <div>
+          <p className="text-sm font-bold text-app-text">{error || '대시보드를 불러오지 못했습니다.'}</p>
+          <button
+            className="mt-4 rounded-lg bg-app-accent px-4 py-2 text-xs font-bold text-app-accent-text transition-colors hover:brightness-110"
+            type="button"
+            onClick={() => setReloadKey(value => value + 1)}
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-content flex flex-col gap-3">
@@ -51,7 +105,7 @@ export default function DashboardPage() {
           <RiskDetailCard risk={selectedRisk} />
           <UnresolvedRiskList
             risks={dashboard.unresolvedRisks}
-            selectedRiskId={selectedRisk.id}
+            selectedRiskId={selectedRisk?.id}
             onSelect={setSelectedRisk}
           />
         </aside>

@@ -48,8 +48,9 @@ export default function UnresolvedRiskList({ risks, selectedRiskId, onSelect }) 
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         {filteredRisks.map(risk => {
-          const severity = String(risk.severity).toUpperCase();
+          const severity = String(risk.severity ?? '').toUpperCase();
           const selected = selectedRiskId === risk.id;
+          const location = [risk.area, risk.facility].filter(Boolean).join(' · ') || '위치 정보 없음';
 
           return (
             <button
@@ -60,17 +61,17 @@ export default function UnresolvedRiskList({ risks, selectedRiskId, onSelect }) 
               onClick={() => onSelect(risk)}
             >
               <span className="flex items-start justify-between gap-3">
-                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-app-text">{risk.content}</span>
-                <span className={`shrink-0 rounded-md border px-2 py-1 text-[10px] font-extrabold ${SEVERITY_STYLES[severity] ?? SEVERITY_STYLES.MEDIUM}`}>
-                  {severity}
+                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-app-text">{risk.content ?? '위험 내용 없음'}</span>
+                <span className={`shrink-0 rounded-md border px-2 py-1 text-[10px] font-extrabold ${SEVERITY_STYLES[severity] ?? 'border-app-border bg-app-active-subtle text-app-muted'}`}>
+                  {severity || '-'}
                 </span>
               </span>
               <span className="mt-1 block truncate text-[11px] text-app-muted">
-                {risk.area} · {risk.facility}
+                {location}
               </span>
               <span className="mt-2 flex items-center justify-between gap-3 text-[11px] text-app-text-soft">
-                <span>{STATUS_LABELS[risk.status] ?? risk.status} {risk.statusDate}</span>
-                <span className="truncate">담당자 {risk.assignee}</span>
+                <span>{STATUS_LABELS[risk.status] ?? risk.status ?? '-'} {risk.statusDate ?? ''}</span>
+                <span className="truncate">담당자 {risk.assignee ?? '미배정'}</span>
               </span>
             </button>
           );

@@ -37,6 +37,7 @@ export default function WorkerLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [workerUserName, setWorkerUserName] = useState('');
   const menuRef = useRef(null);
+  const isActionsList = location.pathname === '/worker/actions';
 
   useEffect(() => {
     function closeMenuOutside(event) {
@@ -66,7 +67,7 @@ export default function WorkerLayout() {
 
   return (
     <div className="min-h-[100dvh] bg-[#dfe5e9] text-[#14232e]">
-      <div className="worker-app relative mx-auto min-h-[100dvh] w-full max-w-[430px] overflow-x-hidden bg-[#f6f8fa]">
+      <div className={`worker-app relative mx-auto w-full max-w-[430px] overflow-x-hidden bg-[#f6f8fa] ${isActionsList ? 'h-[100dvh] overflow-y-hidden' : 'min-h-[100dvh]'}`}>
         <header className="sticky top-0 z-30 flex h-[calc(110px+env(safe-area-inset-top))] items-end justify-between bg-[#f6f8fa]/95 pr-[27px] pl-[30px] pt-[env(safe-area-inset-top)] pb-4 backdrop-blur-lg">
           <WorkerLogo />
           <div ref={menuRef} className="relative">
@@ -88,7 +89,7 @@ export default function WorkerLayout() {
           </div>
         </header>
 
-        <main className="min-w-0 px-[25px] pt-[26px] pb-[calc(125px+env(safe-area-inset-bottom))]">
+        <main className={`min-w-0 px-[25px] pt-[26px] ${isActionsList ? 'h-[calc(100dvh-110px-env(safe-area-inset-top))] overflow-hidden pb-[100px]' : 'pb-[calc(125px+env(safe-area-inset-bottom))]'}`}>
           <Outlet context={{ setWorkerUserName }} />
         </main>
 

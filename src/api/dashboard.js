@@ -18,3 +18,8 @@ export async function getDashboard(options = {}) {
 
   return dashboard;
 }
+
+export async function getFacilityRiskEvents(options = {}) {
+  const dashboard = await getDashboard(options);
+  return dashboard.riskZones;
+}

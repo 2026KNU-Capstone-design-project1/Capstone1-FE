@@ -1,5 +1,11 @@
 import { authorizedRequest } from './auth';
 
+const STATUS_LABELS = {
+  OPEN: '미처리',
+  IN_PROGRESS: '처리 중',
+  RESOLVED: '완료',
+};
+
 function toCount(value) {
   return Number.isFinite(Number(value)) ? Number(value) : 0;
 }
@@ -16,7 +22,18 @@ function toRiskSummary(risk) {
     id: risk.id,
     title: risk.hazard ?? '-',
     location: location || '-',
-    severity: risk.level ?? 'LOW',
+    severity: risk.level ?? risk.riskLevel ?? 'LOW',
+    status: STATUS_LABELS[risk.status] ?? risk.status ?? '-',
+    rawStatus: risk.status,
+    engName: risk.engName
+      ?? risk.eng_name
+      ?? risk.facilityEngName
+      ?? risk.facility?.engName
+      ?? risk.facility?.eng_name,
+    facilityName: risk.facilityName ?? risk.facility?.name ?? '',
+    detectedAt: risk.detectedAt ?? risk.createdAt ?? '-',
+    description: risk.description ?? risk.hazard ?? '-',
+    guide: risk.guide ?? '현장 안전 기준에 따라 위험 요소를 확인하고 조치해 주세요.',
   };
 }
 

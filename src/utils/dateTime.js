@@ -20,6 +20,14 @@ export function formatDateTime(value) {
   return value ? String(value) : '-';
 }
 
+export function formatIsoDateTimeSeconds(value) {
+  const parts = getDateTimeParts(value);
+  if (!parts) return value ? String(value) : '-';
+
+  const [, year, month, day, hour, minute, second = '00'] = parts;
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
+
 export function toTimestamp(value) {
   const parts = getDateTimeParts(value);
   if (parts) {

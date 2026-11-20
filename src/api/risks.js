@@ -34,6 +34,7 @@ function toHistoryItem(item, managerName) {
 export function toRiskItem(risk) {
   return {
     id: risk.id,
+    facilityId: risk.facilityId ?? risk.facility?.id,
     displayCode: `RISK-${String(risk.id).padStart(3, '0')}`,
     content: risk.hazard ?? '-',
     type: risk.riskType ?? '-',
@@ -43,8 +44,12 @@ export function toRiskItem(risk) {
     locationDescription: risk.location ?? '',
     severity: risk.riskLevel ?? '-',
     status: STATUS_LABELS[risk.status] ?? risk.status ?? '-',
+    rawStatus: risk.status,
     detectedAt: risk.createdAt,
+    firstDetectedMs: risk.firstDetectedMs,
+    lastDetectedMs: risk.lastDetectedMs,
     resolvedAt: risk.resolvedAt,
+    evidence: risk.evidence ?? '',
     videos: Array.isArray(risk.relatedVideos) ? risk.relatedVideos.length : 0,
     assignee: risk.managerName ?? '미배정',
     site: risk.siteName ?? '-',

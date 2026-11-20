@@ -183,7 +183,7 @@ export default function FactoryMap({
     : 'bg-[#eef4f6] text-[#596872]';
 
   return (
-    <section className="mt-5 shrink-0 overflow-hidden rounded-[22px] border border-[#e1e6e9] bg-white shadow-[0_5px_16px_rgba(35,54,68,0.035)]" aria-labelledby="factory-map-title">
+    <section className="mt-[15px] shrink-0 overflow-hidden rounded-[22px] border border-[#e1e6e9] bg-white shadow-[0_5px_16px_rgba(35,54,68,0.035)]" aria-labelledby="factory-map-title">
       <div className="flex items-center justify-between px-4 py-3">
         <h2 id="factory-map-title" className="text-[15px] font-extrabold text-[#24343f]">공장 위치 지도</h2>
         <span className="rounded-full bg-[#edf2f4] px-2.5 py-1 text-[10px] font-extrabold tracking-[.08em] text-[#697780]">LIVE GPS</span>

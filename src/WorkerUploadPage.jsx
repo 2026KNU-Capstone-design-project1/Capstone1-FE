@@ -70,9 +70,9 @@ export default function WorkerUploadPage() {
 
   return (
     <section aria-labelledby="worker-upload-title">
-      <h1 id="worker-upload-title" className="mt-1 text-[28px] font-black tracking-[-1.2px]">동영상 업로드</h1>
+      <h1 id="worker-upload-title" className="ml-[5px] text-[28px] leading-9 font-black tracking-[-1.15px]">동영상 업로드</h1>
 
-      <div className="mt-6 rounded-[26px] bg-white p-5">
+      <div className="mt-[15px] rounded-[26px] bg-white p-5">
         <label className="block text-[14px] font-extrabold" htmlFor="upload-area">촬영 구역</label>
         <select id="upload-area" className={`mt-2 h-12 w-full rounded-2xl border border-[#dde4e7] bg-[#f8fafb] px-4 text-[14px] font-semibold outline-none focus:border-app-accent disabled:opacity-60 ${areaId ? 'text-[#14232e]' : 'text-[#89939a]'}`} value={areaId} disabled={isUploading} onChange={event => { setAreaId(event.target.value); setMessage(''); }}>
           <option value="">촬영 구역을 선택하세요</option>

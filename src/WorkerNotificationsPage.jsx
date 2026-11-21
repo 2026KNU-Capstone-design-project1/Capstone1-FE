@@ -12,15 +12,15 @@ export default function WorkerNotificationsPage() {
 
   return (
     <section aria-labelledby="worker-notifications-title">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <p className="text-[13px] font-medium text-[#7b868e]">읽지 않은 알림 {unreadCount}개</p>
-          <h1 id="worker-notifications-title" className="mt-1 text-[28px] font-black tracking-[-1.2px]">알림</h1>
+      <div className="flex h-9 items-center justify-between gap-3">
+        <h1 id="worker-notifications-title" className="ml-[5px] text-[28px] leading-9 font-black tracking-[-1.15px]">알림</h1>
+        <div className="flex min-w-0 items-center gap-3">
+          <p className="truncate text-[12px] font-medium text-[#7b868e]">읽지 않은 알림 {unreadCount}개</p>
+          <button className="shrink-0 text-[13px] font-bold text-app-accent disabled:opacity-40" type="button" disabled={!unreadCount} onClick={() => setNotifications(items => items.map(item => ({ ...item, unread: false })))}>모두 읽음</button>
         </div>
-        <button className="pb-1 text-[13px] font-bold text-app-accent disabled:opacity-40" type="button" disabled={!unreadCount} onClick={() => setNotifications(items => items.map(item => ({ ...item, unread: false })))}>모두 읽음</button>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-[24px] bg-white">
+      <div className="mt-[15px] overflow-hidden rounded-[24px] bg-white">
         {notifications.map(notification => (
           <button key={notification.id} className={`flex w-full gap-3 border-b border-[#edf0f2] p-5 text-left last:border-0 ${notification.unread ? 'bg-[#fffaf6]' : ''}`} type="button" onClick={() => markRead(notification.id)}>
             <span className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-full ${notification.unread ? 'bg-[#fff0e5] text-app-accent' : 'bg-[#f0f3f5] text-[#7c878f]'}`}>

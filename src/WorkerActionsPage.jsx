@@ -115,6 +115,12 @@ export default function WorkerActionsPage() {
         const card = cardRefs.current.get(targetRiskId);
         if (!list || !card) return;
 
+        const hasInternalScroll = list.scrollHeight > list.clientHeight + 1;
+        if (!hasInternalScroll) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
         const listRect = list.getBoundingClientRect();
         const cardRect = card.getBoundingClientRect();
         const cardTopInList = list.scrollTop + cardRect.top - listRect.top;
@@ -131,7 +137,7 @@ export default function WorkerActionsPage() {
 
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden" aria-labelledby="worker-actions-title">
-      <h1 id="worker-actions-title" className="mt-1 shrink-0 text-[28px] font-black tracking-[-1.2px]">내 조치</h1>
+      <h1 id="worker-actions-title" className="ml-[5px] shrink-0 text-[28px] leading-9 font-black tracking-[-1.15px]">내 조치</h1>
 
       <FactoryMap markers={facilityMarkerData.markers} onMarkerSelect={handleMarkerSelect} />
       {riskLoadError && (

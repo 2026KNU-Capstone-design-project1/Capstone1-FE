@@ -1,11 +1,11 @@
 export const FACTORY_MAP_BOUNDS = Object.freeze({
   northWest: Object.freeze({
-    latitude: 35.230501,
-    longitude: 129.084101,
+    latitude: 35.216664,
+    longitude: 129.088299,
   }),
   southEast: Object.freeze({
-    latitude: 35.229791,
-    longitude: 129.084843,
+    latitude: 35.213114,
+    longitude: 129.092006,
   }),
 });
 
